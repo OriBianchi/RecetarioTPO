@@ -1,0 +1,118 @@
+package com.example.desarrollotpo.ui.login
+
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.desarrollotpo.R
+import com.google.android.material.button.MaterialButton
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
+import com.google.android.gms.auth.api.credentials.*
+import com.google.android.gms.auth.api.credentials.Credentials
+import com.google.android.gms.common.api.ResolvableApiException
+
+class LoginFormActivity : AppCompatActivity() {
+
+    private lateinit var credentialsClient: CredentialsClient
+    private val CREDENTIAL_SAVE_REQUEST = 1001
+
+    private fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_login_form)
+
+        credentialsClient = Credentials.getClient(this)
+
+        val emailEditText = findViewById<EditText>(R.id.emailInput)
+        val passwordEditText = findViewById<EditText>(R.id.passwordInput)
+        val loginButton = findViewById<MaterialButton>(R.id.confirmLoginButton)
+        val backButton = findViewById<MaterialButton>(R.id.backButton)
+
+        backButton.setOnClickListener { finish() }
+
+        loginButton.setOnClickListener {
+            val email = emailEditText.text.toString().trim()
+            val password = passwordEditText.text.toString().trim()
+
+            when {
+                email.isEmpty() || password.isEmpty() ->
+                    Toast.makeText(this, "Completá todos los campos", Toast.LENGTH_SHORT).show()
+                !isValidEmail(email) ->
+                    Toast.makeText(this, "Email inválido", Toast.LENGTH_SHORT).show()
+                password.length < 6 ->
+                    Toast.makeText(this, "La contraseña debe tener al menos 6 caracteres", Toast.LENGTH_SHORT).show()
+                else -> {
+                    val client = OkHttpClient()
+                    val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
+                    val requestBody = """{"email":"$email", "password":"$password"}""".toRequestBody(mediaType)
+
+                    val request = Request.Builder()
+                        .url("https://desarrolloitpoapi.onrender.com/api/auth/login")
+                        .post(requestBody)
+                        .build()
+
+                    client.newCall(request).enqueue(object : Callback {
+                        override fun onFailure(call: Call, e: IOException) {
+                            runOnUiThread {
+                                Toast.makeText(this@LoginFormActivity, "Error de red: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        override fun onResponse(call: Call, response: Response) {
+                            runOnUiThread {
+                                if (response.isSuccessful) {
+                                    Toast.makeText(this@LoginFormActivity, "¡Login exitoso! 🎉", Toast.LENGTH_SHORT).show()
+                                    saveCredential(email, password)
+                                } else {
+                                    Toast.makeText(this@LoginFormActivity, "Credenciales inválidas ❌", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    })
+                }
+            }
+        }
+    }
+
+    private fun saveCredential(email: String, password: String) {
+        val credential = Credential.Builder(email)
+            .setPassword(password)
+            .build()
+
+        credentialsClient.save(credential).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(this, "Credencial guardada 🔐", Toast.LENGTH_SHORT).show()
+            } else {
+                val e = task.exception
+                if (e is ResolvableApiException) {
+                    try {
+                        e.startResolutionForResult(this, CREDENTIAL_SAVE_REQUEST)
+                    } catch (ex: Exception) {
+                        Toast.makeText(this, "No se pudo mostrar el diálogo", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this, "No se pudo guardar la credencial 😓", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CREDENTIAL_SAVE_REQUEST) {
+            if (resultCode == Activity.RESULT_OK) {
+                Toast.makeText(this, "Credencial guardada ✅", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Guardado cancelado", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+}

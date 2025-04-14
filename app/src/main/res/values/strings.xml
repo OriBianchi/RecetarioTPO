@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">DesarrolloTPO</string>
+    <string name="register_image_desc">Mascota con laptop</string>
+    <string name="logo">Logo de Saborcito</string>
 </resources>
