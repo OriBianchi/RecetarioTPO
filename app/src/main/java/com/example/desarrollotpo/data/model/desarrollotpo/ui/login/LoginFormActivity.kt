@@ -15,6 +15,9 @@ import java.io.IOException
 import com.google.android.gms.auth.api.credentials.*
 import com.google.android.gms.auth.api.credentials.Credentials
 import com.google.android.gms.common.api.ResolvableApiException
+import android.widget.TextView
+import android.widget.ImageView
+import com.example.desarrollotpo.data.model.desarrollotpo.ui.ForgotPassword.ForgotPasswordActivity
 
 class LoginFormActivity : AppCompatActivity() {
 
@@ -34,9 +37,19 @@ class LoginFormActivity : AppCompatActivity() {
         val emailEditText = findViewById<EditText>(R.id.emailInput)
         val passwordEditText = findViewById<EditText>(R.id.passwordInput)
         val loginButton = findViewById<MaterialButton>(R.id.confirmLoginButton)
-        val backButton = findViewById<MaterialButton>(R.id.backButton)
+        val backInicio = findViewById<ImageView>(R.id.backInicio)
+        val forgotPasswordText = findViewById<TextView>(R.id.olvidocontra)
 
-        backButton.setOnClickListener { finish() }
+
+
+        forgotPasswordText.setOnClickListener {
+            startActivity(Intent(this, ForgotPasswordActivity::class.java))
+        }
+
+
+        backInicio.setOnClickListener {
+            startActivity(Intent(this,WelcomeActivity::class.java))
+        }
 
         loginButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
