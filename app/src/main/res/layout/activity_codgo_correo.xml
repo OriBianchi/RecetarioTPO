@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_light"
@@ -23,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        android:text="¿Olvidaste tu cotraseña?"
+        android:text="Revisa tu correo!"
         android:textColor="@color/negro_letra"
         android:textSize="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -48,7 +47,7 @@
         android:id="@+id/olvidoInfo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Enviaremos un código para recuperar tu contraseña a tu correo."
+        android:text="Ingresa el código que te enviamos a tu correo para recuperar tu contraseña"
         android:textSize="14sp"
         android:textAlignment="center"
         android:padding="12dp"
@@ -64,11 +63,11 @@
 
     <!-- Campo Email -->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/emailLayout"
+        android:id="@+id/codigoEmailLayout"
         style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Email"
+        android:hint="Codigo"
         app:boxBackgroundColor="@color/white"
         app:endIconMode="clear_text"
         android:layout_marginTop="40dp"
@@ -86,18 +85,17 @@
 
     <!-- Botón Enviar -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/enviarCodigoButton"
+        android:id="@+id/VerificarCodigoButton"
         style="@style/Widget.MaterialComponents.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/azul"
-        android:text="Enviar"
+        android:text="Continuar"
         app:cornerRadius="50dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/emailLayout"
+        app:layout_constraintTop_toBottomOf="@+id/codigoEmailLayout"
         android:layout_marginTop="40dp"
         />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

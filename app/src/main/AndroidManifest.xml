@@ -14,12 +14,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DesarrolloTPO"
         tools:targetApi="31">
-
+        <activity
+            android:name=".data.model.desarrollotpo.ui.SinInternetActivity"
+            android:exported="false" />
+        <activity
+            android:name=".data.model.desarrollotpo.ui.ForgotPassword.NewPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".data.model.desarrollotpo.ui.ForgotPassword.CodgoCorreoActivity"
+            android:exported="false" />
         <activity
             android:name=".data.model.desarrollotpo.ui.ForgotPassword.ForgotPasswordActivity"
-            android:exported="false" />
-
-        <!-- Pantalla principal -->
+            android:exported="false" /> <!-- Pantalla principal -->
         <activity
             android:name=".ui.login.WelcomeActivity"
             android:exported="true">
