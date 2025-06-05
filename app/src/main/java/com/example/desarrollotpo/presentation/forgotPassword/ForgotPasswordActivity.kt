@@ -1,6 +1,9 @@
-package com.example.desarrollotpo.data.model.desarrollotpo.presentation.forgotPassword
+package com.example.desarrollotpo.presentation.forgotPassword
 
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -8,7 +11,9 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.desarrollotpo.R
-import com.example.desarrollotpo.ui.login.LoginFormActivity
+import com.example.desarrollotpo.core.BaseActivity
+import com.example.desarrollotpo.presentation.common.SinInternetActivity
+import com.example.desarrollotpo.presentation.login.LoginFormActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import okhttp3.*
@@ -16,10 +21,19 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 
-class ForgotPasswordActivity : AppCompatActivity() {
+class ForgotPasswordActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!hayConexion()) {
+            val intent = Intent(this, SinInternetActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_forgot_password)
 
         val emailEditText = findViewById<TextInputEditText>(R.id.emailInput)
@@ -44,7 +58,6 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Mostrar loading y desactivar botón
             progressBar.visibility = View.VISIBLE
             enviarButton.isEnabled = false
 
@@ -85,5 +98,12 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 }
             })
         }
+    }
+
+    private fun hayConexion(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 }

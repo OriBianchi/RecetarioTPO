@@ -1,4 +1,4 @@
-package com.example.desarrollotpo.data.model.desarrollotpo.presentation.home
+package com.example.desarrollotpo.presentation.home
 
 data class Receta(
     val name: String,

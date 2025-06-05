@@ -1,4 +1,4 @@
-package com.example.desarrollotpo.data.model.desarrollotpo.presentation.home
+package com.example.desarrollotpo.presentation.home
 
 import android.view.LayoutInflater
 import android.view.View
@@ -36,7 +36,14 @@ class RecetaAdapter(private val recetas: List<Receta>) :
         holder.recetaFooter.text = "👤 ${receta.author} • ${receta.stepsCount} pasos"
 
         // Cargar imagen
-        Picasso.get().load(receta.frontImage).into(holder.recetaImage)
+        if (receta.frontImage.isNotBlank()) {
+            Picasso.get()
+                .load(receta.frontImage)
+                .into(holder.recetaImage)
+        } else {
+            holder.recetaImage.setImageResource(R.drawable.placeholder) // Usá un ícono local
+        }
+
     }
 
     override fun getItemCount() = recetas.size

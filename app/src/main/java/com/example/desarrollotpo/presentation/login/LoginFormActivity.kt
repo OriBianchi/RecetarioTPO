@@ -1,4 +1,4 @@
-package com.example.desarrollotpo.ui.login
+package com.example.desarrollotpo.presentation.login
 
 import android.app.Activity
 import android.content.Intent
@@ -17,11 +17,12 @@ import com.google.android.gms.auth.api.credentials.Credentials
 import com.google.android.gms.common.api.ResolvableApiException
 import android.widget.TextView
 import android.widget.ImageView
-import com.example.desarrollotpo.data.model.desarrollotpo.presentation.common.WelcomeActivity
-import com.example.desarrollotpo.data.model.desarrollotpo.presentation.forgotPassword.ForgotPasswordActivity
-import com.example.desarrollotpo.data.model.desarrollotpo.presentation.home.InicioActivity
+import com.example.desarrollotpo.core.BaseActivity
+import com.example.desarrollotpo.presentation.common.WelcomeActivity
+import com.example.desarrollotpo.presentation.forgotPassword.ForgotPasswordActivity
+import com.example.desarrollotpo.presentation.home.InicioActivity
 
-class LoginFormActivity : AppCompatActivity() {
+class LoginFormActivity : BaseActivity() {
 
     private lateinit var credentialsClient: CredentialsClient
     private val CREDENTIAL_SAVE_REQUEST = 1001
