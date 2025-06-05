@@ -1,10 +1,11 @@
 // WelcomeActivity implementation goes here
-package com.example.desarrollotpo.ui.login
+package com.example.desarrollotpo.data.model.desarrollotpo.presentation.common
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.desarrollotpo.R
+import com.example.desarrollotpo.ui.login.LoginFormActivity
 import com.example.desarrollotpo.ui.register.RegisterFormActivity
 import com.google.android.material.button.MaterialButton
 

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_guardados"
+        android:icon="@drawable/ic_bookmark"
+        android:title="Guardados" />
+
+    <item
+        android:id="@+id/nav_crear"
+        android:icon="@drawable/ic_add_circle"
+        android:title="Crear" />
+
+    <item
+        android:id="@+id/nav_mis_recetas"
+        android:icon="@drawable/ic_person"
+        android:title="Mis recetas" />
+</menu>

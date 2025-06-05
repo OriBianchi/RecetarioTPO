@@ -1,1 +1,0 @@
-// LoginResponse implementation goes here

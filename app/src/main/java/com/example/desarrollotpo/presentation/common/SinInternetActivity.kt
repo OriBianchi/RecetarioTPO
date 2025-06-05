@@ -1,4 +1,4 @@
-package com.example.desarrollotpo.data.model.desarrollotpo.ui
+package com.example.desarrollotpo.data.model.desarrollotpo.presentation.common
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,7 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 
 import com.example.desarrollotpo.R
-import com.example.desarrollotpo.ui.login.WelcomeActivity
 
 class SinInternetActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

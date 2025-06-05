@@ -17,7 +17,9 @@ import com.google.android.gms.auth.api.credentials.Credentials
 import com.google.android.gms.common.api.ResolvableApiException
 import android.widget.TextView
 import android.widget.ImageView
-import com.example.desarrollotpo.data.model.desarrollotpo.ui.ForgotPassword.ForgotPasswordActivity
+import com.example.desarrollotpo.data.model.desarrollotpo.presentation.common.WelcomeActivity
+import com.example.desarrollotpo.data.model.desarrollotpo.presentation.forgotPassword.ForgotPasswordActivity
+import com.example.desarrollotpo.data.model.desarrollotpo.presentation.home.InicioActivity
 
 class LoginFormActivity : AppCompatActivity() {
 
@@ -48,7 +50,7 @@ class LoginFormActivity : AppCompatActivity() {
 
 
         backInicio.setOnClickListener {
-            startActivity(Intent(this,WelcomeActivity::class.java))
+            startActivity(Intent(this, WelcomeActivity::class.java))
         }
 
         loginButton.setOnClickListener {
@@ -84,6 +86,7 @@ class LoginFormActivity : AppCompatActivity() {
                                 if (response.isSuccessful) {
                                     Toast.makeText(this@LoginFormActivity, "¡Login exitoso! 🎉", Toast.LENGTH_SHORT).show()
                                     saveCredential(email, password)
+                                    startActivity(Intent(this@LoginFormActivity, InicioActivity::class.java))
                                 } else {
                                     Toast.makeText(this@LoginFormActivity, "Credenciales inválidas ❌", Toast.LENGTH_SHORT).show()
                                 }

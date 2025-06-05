@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -7,12 +7,13 @@
     android:background="@color/background_light"
     android:padding="24dp">
 
-    <!-- Flecha -->
+    <!-- Flecha de volver -->
     <ImageView
         android:id="@+id/backInicio"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:src="@drawable/baseline_arrow_back_24"
+        android:contentDescription="Volver"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="0dp" />
@@ -22,23 +23,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        android:text="Revisa tu correo!"
+        android:text="Revisá tu correo!"
         android:textColor="@color/negro_letra"
         android:textSize="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Logo de Pororó -->
-
-
     <ImageView
         android:id="@+id/logoImage"
         android:layout_width="161dp"
         android:layout_height="152dp"
         android:layout_marginTop="28dp"
         android:src="@drawable/logo"
+        android:contentDescription="Logo de Pororó"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/welcomeText" />
@@ -47,27 +46,24 @@
         android:id="@+id/olvidoInfo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Ingresa el código que te enviamos a tu correo para recuperar tu contraseña"
+        android:text="Ingresá el código que te enviamos a tu correo para recuperar tu contraseña. Si no recibiste nada, revisá tu carpeta de spam."
         android:textSize="14sp"
         android:textAlignment="center"
         android:padding="12dp"
         android:background="@drawable/rounded_background"
         android:textColor="#444444"
-        app:layout_constraintTop_toBottomOf="@id/logoImage"
         android:layout_marginTop="40dp"
+        app:layout_constraintTop_toBottomOf="@id/logoImage"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        />
-
-
-    <!-- Campo Email -->
+    <!-- Campo Código -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/codigoEmailLayout"
         style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Codigo"
+        android:hint="Código"
         app:boxBackgroundColor="@color/white"
         app:endIconMode="clear_text"
         android:layout_marginTop="40dp"
@@ -76,14 +72,14 @@
         app:layout_constraintTop_toBottomOf="@id/olvidoInfo">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/emailInput"
+            android:id="@+id/codigoInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"
-            android:searchResultHighlightColor="@color/azul" />
+            android:inputType="text"
+            android:textColor="@color/black" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Botón Enviar -->
+    <!-- Botón Verificar Código -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/VerificarCodigoButton"
         style="@style/Widget.MaterialComponents.Button"
@@ -95,7 +91,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/codigoEmailLayout"
-        android:layout_marginTop="40dp"
-        />
+        android:layout_marginTop="40dp" />
+
+    <!-- ProgressBar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/VerificarCodigoButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

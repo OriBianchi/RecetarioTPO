@@ -43,6 +43,10 @@ android {
 }
 
 dependencies {
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.picasso:picasso:2.71828")
+
     // ✅ Smart Lock para contraseñas
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
@@ -52,6 +56,10 @@ dependencies {
 
     // Red HTTP
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // Material UI Iconos
+    implementation ("androidx.compose.material:material-icons-core:1.6.1")
+    implementation ("androidx.compose.material:material-icons-extended:1.6.1")
 
     // UI
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
