@@ -8,18 +8,19 @@ import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.desarrollotpo.R
 import com.example.desarrollotpo.core.BaseActivity
 import com.example.desarrollotpo.presentation.common.SinInternetActivity
+import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
+import android.widget.PopupMenu
 
 class InicioActivity : BaseActivity() {
 
@@ -27,7 +28,9 @@ class InicioActivity : BaseActivity() {
     private lateinit var adapter: RecetaAdapter
     private val recetas = mutableListOf<Receta>()
 
-    private var order = "newest"
+    // Filtros
+    private var sortBy = "uploadDate"
+    private var sortOrder = "desc"
     private var type = "all"
     private var include = ""
     private var exclude = ""
@@ -63,6 +66,43 @@ class InicioActivity : BaseActivity() {
             false
         })
 
+        val chipOrder = findViewById<Chip>(R.id.chipOrder)
+        chipOrder.setOnClickListener {
+            val popup = PopupMenu(this, chipOrder)
+            popup.menu.add("Más reciente")
+            popup.menu.add("Más antiguo")
+            popup.menu.add("Alfabéticamente")
+            popup.menu.add("Nombre de usuario")
+
+            popup.setOnMenuItemClickListener { item ->
+                when (item.title) {
+                    "Más reciente" -> {
+                        sortBy = "uploadDate"
+                        sortOrder = "desc"
+                        chipOrder.text = "Ordenado por: más reciente"
+                    }
+                    "Más antiguo" -> {
+                        sortBy = "uploadDate"
+                        sortOrder = "asc"
+                        chipOrder.text = "Ordenado por: más antiguo"
+                    }
+                    "Alfabéticamente" -> {
+                        sortBy = "name"
+                        sortOrder = "asc"
+                        chipOrder.text = "Ordenado por: A-Z"
+                    }
+                    "Nombre de usuario" -> {
+                        sortBy = "username"
+                        sortOrder = "asc"
+                        chipOrder.text = "Ordenado por: usuario"
+                    }
+                }
+                fetchRecetas()
+                true
+            }
+            popup.show()
+        }
+
         fetchRecetas()
     }
 
@@ -72,13 +112,14 @@ class InicioActivity : BaseActivity() {
         val urlBuilder = "https://desarrolloitpoapi.onrender.com/api/recipes"
             .toHttpUrlOrNull()!!.newBuilder()
 
-        urlBuilder.addQueryParameter("order", order)
+        urlBuilder.addQueryParameter("sortBy", sortBy)
+        urlBuilder.addQueryParameter("sortOrder", sortOrder)
         urlBuilder.addQueryParameter("type", type)
         urlBuilder.addQueryParameter("include", include)
         urlBuilder.addQueryParameter("exclude", exclude)
-        urlBuilder.addQueryParameter("author", author)
-        urlBuilder.addQueryParameter("saved", saved)
-        urlBuilder.addQueryParameter("search", search)
+        urlBuilder.addQueryParameter("createdBy", author)
+        urlBuilder.addQueryParameter("savedByUser", if (saved == "only") "true" else "")
+        urlBuilder.addQueryParameter("name", search)
 
         val request = Request.Builder()
             .url(urlBuilder.build())
