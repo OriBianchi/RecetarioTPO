@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -14,34 +14,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DesarrolloTPO"
-        tools:targetApi="31">
-
-        <!-- Pantalla de bienvenida (launcher) -->
+        tools:targetApi="31" >
+        <activity
+            android:name=".presentation.crearReceta.CrearRecetaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.perfil.PerfilActivity"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.guardados.GuardadosActivity"
+            android:exported="false" /> <!-- Pantalla de bienvenida (launcher) -->
         <activity
             android:name=".presentation.common.WelcomeActivity"
-            android:exported="true">
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Pantalla de login -->
-        <activity android:name=".presentation.login.LoginFormActivity" />
-
-        <!-- Pantalla principal del sistema -->
-        <activity android:name=".presentation.home.InicioActivity" />
-
-        <!-- Recuperación de contraseña -->
+        </activity> <!-- Pantalla de login -->
+        <activity android:name=".presentation.login.LoginFormActivity" /> <!-- Pantalla principal del sistema -->
+        <activity android:name=".presentation.home.InicioActivity" /> <!-- Recuperación de contraseña -->
         <activity android:name=".presentation.forgotPassword.ForgotPasswordActivity" />
         <activity android:name=".presentation.forgotPassword.CodgoCorreoActivity" />
-        <activity android:name=".presentation.forgotPassword.NewPasswordActivity" />
-
-        <!-- Registro de usuario -->
-        <activity android:name=".presentation.register.RegisterFormActivity" />
-
-        <!-- Pantalla offline -->
+        <activity android:name=".presentation.forgotPassword.NewPasswordActivity" /> <!-- Registro de usuario -->
+        <activity android:name=".presentation.register.RegisterFormActivity" /> <!-- Pantalla offline -->
         <activity android:name=".presentation.common.SinInternetActivity" />
-
     </application>
+
 </manifest>
