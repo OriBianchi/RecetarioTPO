@@ -21,24 +21,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- guardados -->
-
-    <ImageButton
-        android:id="@+id/guardados"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:outlineSpotShadowColor="@color/azul"
-        android:src="@drawable/ic_bookmark"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        android:layout_marginTop="-8dp"
-        app:layout_constraintStart_toEndOf="@id/tituloInicio"
-        app:layout_constraintTop_toTopOf="parent"
-        android:backgroundTint=""
-        android:tint="@color/azul"
-        tools:ignore="UseAppTint" />
-
-
 
     <!-- Buscador -->
     <com.google.android.material.textfield.TextInputLayout
@@ -132,9 +114,14 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="@color/bottom_nav_color"
+        app:itemTextColor="@color/bottom_nav_color"
+        app:labelVisibilityMode="labeled"
         android:backgroundTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -24,6 +24,8 @@ import java.io.IOException
 import android.widget.PopupMenu
 import android.text.Editable
 import android.text.TextWatcher
+import com.example.desarrollotpo.utils.setupBottomNavigation
+
 
 
 
@@ -51,6 +53,7 @@ class InicioActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         if (!hayConexion()) {
             val intent = Intent(this, SinInternetActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -60,6 +63,8 @@ class InicioActivity : BaseActivity() {
         }
 
         setContentView(R.layout.activity_inicio)
+        setupBottomNavigation(R.id.nav_inicio)
+
 
         recyclerView = findViewById(R.id.recetasRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)

@@ -5,15 +5,16 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.crear.CrearActivity"
+    tools:context=".presentation.misrecetas.MisRecetasActivity"
+
     android:padding="16dp">
 
     <!-- Título -->
     <TextView
-        android:id="@+id/tituloCrearReceta"
+        android:id="@+id/tituloMisRecetas"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Crear Receta"
+        android:text="Mis Receetas"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@color/negro_letra"

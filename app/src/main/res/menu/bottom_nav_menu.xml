@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/nav_guardados"
+        android:id="@+id/nav_inicio"
+        android:icon="@drawable/ic_home"
+        android:title="Inicio" />
+
+    <item
+        android:id="@+id/nav_Guardados"
         android:icon="@drawable/ic_bookmark"
         android:title="Guardados" />
 
@@ -12,6 +17,13 @@
 
     <item
         android:id="@+id/nav_mis_recetas"
+        android:icon="@drawable/ic_storage"
+        android:title="Mis Recetas" />
+
+    <item
+        android:id="@+id/nav_perfil"
         android:icon="@drawable/ic_person"
-        android:title="Mis recetas" />
+        android:title="Perfil" />
+
+
 </menu>
