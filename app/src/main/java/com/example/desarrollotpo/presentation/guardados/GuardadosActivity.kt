@@ -1,6 +1,7 @@
 package com.example.desarrollotpo.presentation.guardados
 
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -59,7 +60,7 @@ class GuardadosActivity : BaseActivity() {
 
         recyclerView = findViewById(R.id.recetasRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = RecetaAdapter(recetas)
+        adapter = RecetaAdapter(this, recetas)
         recyclerView.adapter = adapter
 
 
@@ -105,7 +106,7 @@ class GuardadosActivity : BaseActivity() {
                 ingredientesSeleccionados.contains(ingredientesArray[i])
             }
 
-            val builder = android.app.AlertDialog.Builder(this)
+            val builder = AlertDialog.Builder(this)
             builder.setTitle("Seleccionar ingredientes a incluir")
             builder.setMultiChoiceItems(ingredientesArray, seleccionadosTemp) { _, which, isChecked ->
                 if (isChecked) {
@@ -140,7 +141,7 @@ class GuardadosActivity : BaseActivity() {
                 ingredientesAExcluir.contains(ingredientesArray[i])
             }
 
-            val builder = android.app.AlertDialog.Builder(this)
+            val builder = AlertDialog.Builder(this)
             builder.setTitle("Seleccionar ingredientes a excluir")
             builder.setMultiChoiceItems(ingredientesArray, seleccionadosTemp) { _, which, isChecked ->
                 if (isChecked) {
@@ -216,14 +217,17 @@ class GuardadosActivity : BaseActivity() {
                     val steps = item.optJSONArray("steps") ?: JSONArray()
                     val image = item.optJSONArray("frontpagePhotos")?.optString(0) ?: ""
 
+                    val id = item.getString("_id")
                     val receta = Receta(
+                        id = id,
                         name = name,
                         classification = classification,
                         ingredients = ingredients,
                         description = description,
                         frontImage = image,
                         author = username,
-                        stepsCount = steps.length()
+                        stepsCount = steps.length(),
+                        isSaved = true // porque vienen de recetas guardadas
                     )
                     recetas.add(receta)
                 }
@@ -264,7 +268,7 @@ class GuardadosActivity : BaseActivity() {
     }
 
     private fun hayConexion(): Boolean {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)

@@ -68,7 +68,7 @@ class InicioActivity : BaseActivity() {
 
         recyclerView = findViewById(R.id.recetasRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = RecetaAdapter(recetas)
+        adapter = RecetaAdapter(this, recetas)
         recyclerView.adapter = adapter
 
 
@@ -328,15 +328,21 @@ class InicioActivity : BaseActivity() {
                     val steps = item.optJSONArray("steps") ?: JSONArray()
                     val image = item.optJSONArray("frontpagePhotos")?.optString(0) ?: ""
 
+                    val id = item.getString("_id")
+                    val isSaved = item.optBoolean("isSaved", false)
+
                     val receta = Receta(
+                        id = id,
                         name = name,
                         classification = classification,
                         ingredients = ingredients,
                         description = description,
                         frontImage = image,
                         author = username,
-                        stepsCount = steps.length()
+                        stepsCount = steps.length(),
+                        isSaved = isSaved
                     )
+
                     recetas.add(receta)
                 }
 
