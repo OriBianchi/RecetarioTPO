@@ -1,6 +1,5 @@
 package com.example.desarrollotpo.presentation.guardados
 
-
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -11,7 +10,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.inputmethod.EditorInfo
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,6 +19,8 @@ import com.example.desarrollotpo.core.BaseActivity
 import com.example.desarrollotpo.presentation.common.SinInternetActivity
 import com.example.desarrollotpo.presentation.home.Receta
 import com.example.desarrollotpo.presentation.home.RecetaAdapter
+import com.example.desarrollotpo.utils.TokenUtils
+import com.example.desarrollotpo.utils.setupBottomNavigation
 import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
 import okhttp3.*
@@ -28,10 +28,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
-import com.example.desarrollotpo.presentation.home.InicioActivity
-import com.example.desarrollotpo.utils.setupBottomNavigation
-
-
 
 class GuardadosActivity : BaseActivity() {
 
@@ -57,16 +53,10 @@ class GuardadosActivity : BaseActivity() {
         setContentView(R.layout.activity_guardados)
         setupBottomNavigation(R.id.nav_Guardados)
 
-
         recyclerView = findViewById(R.id.recetasRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = RecetaAdapter(this, recetas)
         recyclerView.adapter = adapter
-
-
-
-
-
 
         val searchInput = findViewById<TextInputEditText>(R.id.searchInput)
         searchInput.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, _ ->
@@ -179,10 +169,18 @@ class GuardadosActivity : BaseActivity() {
         urlBuilder.addQueryParameter("excludeIngredient", exclude)
         urlBuilder.addQueryParameter("name", search)
 
-        val request = Request.Builder()
+        val token = TokenUtils.obtenerToken(this)
+        Log.d("TOKEN_CHECK", "Token actual: $token")
+
+        val requestBuilder = Request.Builder()
             .url(urlBuilder.build())
             .get()
-            .build()
+
+        if (token.isNotEmpty()) {
+            requestBuilder.header("Authorization", "Bearer $token")
+        }
+
+        val request = requestBuilder.build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -192,10 +190,15 @@ class GuardadosActivity : BaseActivity() {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                if (!response.isSuccessful) return
+                val jsonBody = response.body?.string() ?: return
+                val jsonObject = JSONObject(jsonBody)
 
-                val jsonBody = response.body?.string() ?: "{}"
-                val jsonArray = JSONObject(jsonBody).getJSONArray("recipes")
+                if (!jsonObject.has("recipes")) {
+                    Log.e("CRASH_DEBUG", "No vino 'recipes'. Respuesta: $jsonBody")
+                    return
+                }
+
+                val jsonArray = jsonObject.getJSONArray("recipes")
                 recetas.clear()
 
                 for (i in 0 until jsonArray.length()) {
@@ -227,7 +230,7 @@ class GuardadosActivity : BaseActivity() {
                         frontImage = image,
                         author = username,
                         stepsCount = steps.length(),
-                        isSaved = true // porque vienen de recetas guardadas
+                        isSaved = true
                     )
                     recetas.add(receta)
                 }
@@ -252,9 +255,17 @@ class GuardadosActivity : BaseActivity() {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {}
+
             override fun onResponse(call: Call, response: Response) {
                 val jsonBody = response.body?.string() ?: return
-                val jsonArray = JSONObject(jsonBody).getJSONArray("recipes")
+                val jsonObject = JSONObject(jsonBody)
+
+                if (!jsonObject.has("recipes")) {
+                    Log.e("CRASH_DEBUG", "No vino 'recipes'. Respuesta: $jsonBody")
+                    return
+                }
+
+                val jsonArray = jsonObject.getJSONArray("recipes")
                 for (i in 0 until jsonArray.length()) {
                     val receta = jsonArray.getJSONObject(i)
                     val ingredientsList = receta.optJSONArray("ingredients") ?: continue

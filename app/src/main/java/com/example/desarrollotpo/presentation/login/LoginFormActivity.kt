@@ -21,6 +21,7 @@ import com.example.desarrollotpo.core.BaseActivity
 import com.example.desarrollotpo.presentation.common.WelcomeActivity
 import com.example.desarrollotpo.presentation.forgotPassword.ForgotPasswordActivity
 import com.example.desarrollotpo.presentation.home.InicioActivity
+import org.json.JSONObject
 
 class LoginFormActivity : BaseActivity() {
 
@@ -85,12 +86,19 @@ class LoginFormActivity : BaseActivity() {
                         override fun onResponse(call: Call, response: Response) {
                             runOnUiThread {
                                 if (response.isSuccessful) {
-                                    Toast.makeText(this@LoginFormActivity, "¡Login exitoso! 🎉", Toast.LENGTH_SHORT).show()
-                                    saveCredential(email, password)
-                                    startActivity(Intent(this@LoginFormActivity, InicioActivity::class.java))
-                                } else {
-                                    Toast.makeText(this@LoginFormActivity, "Credenciales inválidas ❌", Toast.LENGTH_SHORT).show()
+                                    val json = response.body?.string()
+                                    val token = JSONObject(json).optString("token")
+
+                                    if (token.isNotEmpty()) {
+                                        com.example.desarrollotpo.utils.TokenUtils.guardarToken(this@LoginFormActivity, token)
+                                        Toast.makeText(this@LoginFormActivity, "¡Login exitoso! 🎉", Toast.LENGTH_SHORT).show()
+                                        saveCredential(email, password)
+                                        startActivity(Intent(this@LoginFormActivity, InicioActivity::class.java))
+                                    } else {
+                                        Toast.makeText(this@LoginFormActivity, "Token no recibido 😕", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
+
                             }
                         }
                     })

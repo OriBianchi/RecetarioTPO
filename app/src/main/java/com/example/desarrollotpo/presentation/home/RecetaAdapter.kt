@@ -12,6 +12,9 @@ import com.example.desarrollotpo.utils.TokenUtils
 import com.squareup.picasso.Picasso
 import okhttp3.*
 import java.io.IOException
+import android.util.Log
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class RecetaAdapter(private val context: Context, private val recetas: List<Receta>) :
     RecyclerView.Adapter<RecetaAdapter.RecetaViewHolder>() {
@@ -54,45 +57,54 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
 
         // Lógica para guardar o desguardar
         holder.recetaGuardar.setOnClickListener {
+            Log.d("DEBUG_RECETA", "Click en receta: ${receta.name} | Guardada: ${receta.isSaved}")
+
             val client = OkHttpClient()
             val token = TokenUtils.obtenerToken(holder.itemView.context)
             val url = if (receta.isSaved) {
-                "https://desarrolloitpoapi.onrender.com/api/user-recipes/unsave"
+                "https://desarrolloitpoapi.onrender.com/api/user/recipes/unsave"
             } else {
-                "https://desarrolloitpoapi.onrender.com/api/user-recipes/save"
+                "https://desarrolloitpoapi.onrender.com/api/user/recipes/save"
             }
 
-            val body = FormBody.Builder()
-                .add("recipeId", receta.id)
-                .build()
+            val jsonBody = """{"recipeId": "${receta.id}"}"""
+                .toRequestBody("application/json; charset=utf-8".toMediaType())
 
             val request = Request.Builder()
                 .url(url)
-                .post(body)
+                .post(jsonBody)
                 .addHeader("Authorization", "Bearer $token")
+                .addHeader("Content-Type", "application/json")
                 .build()
+
+            // ✅ 1) Marcar cambio al toque (optimistic update)
+            receta.isSaved = !receta.isSaved
+            holder.recetaGuardar.text = if (receta.isSaved) "Guardada" else "Guardar"
 
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
+                    Log.e("DEBUG_RECETA", "Fallo red: ${e.message}")
+                    // ✅ 2) Si falla, revertir y avisar
+                    receta.isSaved = !receta.isSaved
                     (holder.itemView.context as? Activity)?.runOnUiThread {
+                        holder.recetaGuardar.text = if (receta.isSaved) "Guardada" else "Guardar"
                         Toast.makeText(holder.itemView.context, "Error de red", Toast.LENGTH_SHORT).show()
                     }
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    (holder.itemView.context as? Activity)?.runOnUiThread {
-                        if (response.isSuccessful) {
-                            // Cambiar estado localmente
-                            receta.isSaved = !receta.isSaved
+                    Log.d("DEBUG_RECETA", "Código respuesta: ${response.code}")
+                    Log.d("DEBUG_RECETA", "Body respuesta: ${response.body?.string()}")
+                    if (!response.isSuccessful) {
+                        // ✅ 3) Si el server rechaza, revertir y avisar
+                        receta.isSaved = !receta.isSaved
+                        (holder.itemView.context as? Activity)?.runOnUiThread {
                             holder.recetaGuardar.text = if (receta.isSaved) "Guardada" else "Guardar"
-                            Toast.makeText(
-                                holder.itemView.context,
-                                if (receta.isSaved) "Receta guardada" else "Receta desguardada",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
-                            Toast.makeText(holder.itemView.context, "Error al actualizar", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(holder.itemView.context, "Error al guardar", Toast.LENGTH_SHORT).show()
                         }
+                    } else {
+                        // ✅ 4) Todo OK, opcional: mostrar éxito (si querés)
+                        Log.d("DEBUG_RECETA", "Guardado OK")
                     }
                 }
             })

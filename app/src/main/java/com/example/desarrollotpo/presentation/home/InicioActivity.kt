@@ -27,9 +27,6 @@ import android.text.TextWatcher
 import com.example.desarrollotpo.utils.setupBottomNavigation
 
 
-
-
-
 class InicioActivity : BaseActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -37,7 +34,6 @@ class InicioActivity : BaseActivity() {
     private val recetas = mutableListOf<Receta>()
     private val autoresDisponibles = mutableSetOf<String>()
     private val ingredientesDisponibles = mutableSetOf<String>()
-
 
     // Filtros
     private var sortBy = "uploadDate"
@@ -49,10 +45,8 @@ class InicioActivity : BaseActivity() {
     private var saved = "all"
     private var search = ""
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         if (!hayConexion()) {
             val intent = Intent(this, SinInternetActivity::class.java)
@@ -65,13 +59,10 @@ class InicioActivity : BaseActivity() {
         setContentView(R.layout.activity_inicio)
         setupBottomNavigation(R.id.nav_inicio)
 
-
         recyclerView = findViewById(R.id.recetasRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = RecetaAdapter(this, recetas)
         recyclerView.adapter = adapter
-
-
 
         val searchInput = findViewById<TextInputEditText>(R.id.searchInput)
         searchInput.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, _ ->
@@ -90,12 +81,9 @@ class InicioActivity : BaseActivity() {
                     fetchRecetas()
                 }
             }
-
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
-
-
 
         val chipOrder = findViewById<Chip>(R.id.chipOrder)
         chipOrder.setOnClickListener {
@@ -133,14 +121,13 @@ class InicioActivity : BaseActivity() {
             }
             popup.show()
         }
+
         val chipInclude = findViewById<Chip>(R.id.chipInclude)
         val ingredientesSeleccionados = mutableSetOf<String>()
         val chipExclude = findViewById<Chip>(R.id.chipExclude)
         val ingredientesAExcluir = mutableSetOf<String>()
         val chipAuthor = findViewById<Chip>(R.id.chipAuthor)
         val autoresSeleccionados = mutableSetOf<String>()
-
-
 
         chipInclude.setOnClickListener {
             if (ingredientesDisponibles.isEmpty()) {
@@ -211,6 +198,7 @@ class InicioActivity : BaseActivity() {
             builder.setNegativeButton("Cancelar", null)
             builder.show()
         }
+
         chipAuthor.setOnClickListener {
             if (autoresDisponibles.isEmpty()) {
                 Toast.makeText(this, "Todavía no se cargaron los usuarios", Toast.LENGTH_SHORT).show()
@@ -246,9 +234,6 @@ class InicioActivity : BaseActivity() {
             builder.show()
         }
 
-
-
-
         cargarIngredientesGlobales()
         fetchRecetas()
     }
@@ -265,21 +250,31 @@ class InicioActivity : BaseActivity() {
         urlBuilder.addQueryParameter("ingredient", include)
         urlBuilder.addQueryParameter("excludeIngredient", exclude)
         urlBuilder.addQueryParameter("createdBy", author)
-        urlBuilder.addQueryParameter("savedByUser", if (saved == "only") "true" else "")
         urlBuilder.addQueryParameter("name", search)
 
+        val token = com.example.desarrollotpo.utils.TokenUtils.obtenerToken(this)
+        Log.d("TOKEN_CHECK", "Token actual: $token")
 
+        if (saved == "only") {
+            if (token.isNotEmpty()) {
+                urlBuilder.addQueryParameter("savedByUser", "true")
+            } else {
+                runOnUiThread {
+                    Toast.makeText(this, "Tenés que iniciar sesión para ver guardadas", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+        }
 
-        val requestUrl = urlBuilder.build()
-        Log.d("DEBUG_API", requestUrl.toString())
-
-
-        val request = Request.Builder()
+        val requestBuilder = Request.Builder()
             .url(urlBuilder.build())
             .get()
-            .build()
 
+        if (token.isNotEmpty()) {
+            requestBuilder.header("Authorization", "Bearer $token")
+        }
 
+        val request = requestBuilder.build()
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -289,20 +284,17 @@ class InicioActivity : BaseActivity() {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                if (!response.isSuccessful) {
-                    runOnUiThread {
-                        Toast.makeText(this@InicioActivity, "Error al cargar recetas", Toast.LENGTH_SHORT).show()
-                    }
+                val jsonBody = response.body?.string() ?: return
+                val jsonObject = JSONObject(jsonBody)
+
+                if (!jsonObject.has("recipes")) {
+                    Log.e("CRASH_DEBUG", "No vino 'recipes'. Respuesta: $jsonBody")
                     return
                 }
 
-                val jsonBody = response.body?.string() ?: "{}"
-                val jsonObject = JSONObject(jsonBody)
                 val jsonArray = jsonObject.getJSONArray("recipes")
 
-
                 recetas.clear()
-
 
                 for (i in 0 until jsonArray.length()) {
                     val item = jsonArray.getJSONObject(i)
@@ -316,9 +308,9 @@ class InicioActivity : BaseActivity() {
                     if (ingredientsList != null) {
                         for (j in 0 until ingredientsList.length()) {
                             val ing = ingredientsList.getJSONObject(j)
-                            val nombre = ing.getString("name") // obtenemos el nombre
-                            ingredients.add(nombre) // lo agregamos a la lista de esta receta
-                            ingredientesDisponibles.add(nombre) // lo agregamos al set global
+                            val nombre = ing.getString("name")
+                            ingredients.add(nombre)
+                            ingredientesDisponibles.add(nombre)
                         }
                     }
 
@@ -327,7 +319,6 @@ class InicioActivity : BaseActivity() {
                     autoresDisponibles.add(username)
                     val steps = item.optJSONArray("steps") ?: JSONArray()
                     val image = item.optJSONArray("frontpagePhotos")?.optString(0) ?: ""
-
                     val id = item.getString("_id")
                     val isSaved = item.optBoolean("isSaved", false)
 
@@ -353,13 +344,6 @@ class InicioActivity : BaseActivity() {
         })
     }
 
-    private fun hayConexion(): Boolean {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-    }
-
     private fun cargarIngredientesGlobales() {
         val client = OkHttpClient()
         val url = "https://desarrolloitpoapi.onrender.com/api/recipes"
@@ -372,13 +356,17 @@ class InicioActivity : BaseActivity() {
         val request = Request.Builder().url(url).get().build()
 
         client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                // No hagas nada o poné un log si querés
-            }
+            override fun onFailure(call: Call, e: IOException) {}
 
             override fun onResponse(call: Call, response: Response) {
                 val jsonBody = response.body?.string() ?: return
                 val jsonObject = JSONObject(jsonBody)
+
+                if (!jsonObject.has("recipes")) {
+                    Log.e("CRASH_DEBUG", "No vino 'recipes'. Respuesta: $jsonBody")
+                    return
+                }
+
                 val jsonArray = jsonObject.getJSONArray("recipes")
 
                 val nuevosIngredientes = mutableSetOf<String>()
@@ -393,11 +381,15 @@ class InicioActivity : BaseActivity() {
                     }
                 }
 
-
                 ingredientesDisponibles.addAll(nuevosIngredientes)
             }
         })
     }
 
-
+    private fun hayConexion(): Boolean {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
 }
