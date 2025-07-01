@@ -59,6 +59,7 @@ class InicioActivity : BaseActivity() {
         setContentView(R.layout.activity_inicio)
         setupBottomNavigation(R.id.nav_inicio)
 
+
         recyclerView = findViewById(R.id.recetasRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = RecetaAdapter(this, recetas)
@@ -236,6 +237,12 @@ class InicioActivity : BaseActivity() {
 
         cargarIngredientesGlobales()
         fetchRecetas()
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 100) {
+            fetchRecetas()
+        }
     }
 
     private fun fetchRecetas() {

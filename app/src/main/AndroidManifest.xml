@@ -16,6 +16,18 @@
         android:theme="@style/Theme.DesarrolloTPO"
         tools:targetApi="31">
         <activity
+            android:name=".presentation.VerReceta.ComentarioAdapter"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.VerReceta.PasoAdapter"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.VerReceta.IngredienteAdapter"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.VerReceta.RecetaDetalleActivity"
+            android:exported="false" />
+        <activity
             android:name=".presentation.misrecetas.MisRecetasActivity"
             android:exported="false" />
         <activity

@@ -2,6 +2,7 @@ package com.example.desarrollotpo.presentation.home
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,7 @@ import com.squareup.picasso.Picasso
 import okhttp3.*
 import java.io.IOException
 import android.util.Log
+import com.example.desarrollotpo.presentation.VerReceta.RecetaDetalleActivity
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 
@@ -42,6 +44,16 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
         holder.recetaIngredientes.text = "Ingredientes: ${receta.ingredients.joinToString(", ")}"
         holder.recetaDescripcion.text = receta.description
         holder.recetaFooter.text = "👤 ${receta.author} • ${receta.stepsCount} pasos"
+
+
+        holder.itemView.setOnClickListener {
+            val intent = Intent(context, RecetaDetalleActivity::class.java)
+            intent.putExtra("RECIPE_ID", receta.id)
+            intent.putExtra("IS_SAVED", receta.isSaved)
+            (context as Activity).startActivityForResult(intent, 100)
+        }
+
+
 
         // Imagen
         if (receta.frontImage.isNotBlank()) {
