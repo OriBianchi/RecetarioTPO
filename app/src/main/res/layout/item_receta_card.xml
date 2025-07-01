@@ -1,5 +1,5 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:padding="12dp"
     android:layout_width="match_parent"
@@ -86,14 +86,39 @@
             android:maxLines="2"
             android:ellipsize="end"/>
 
-        <TextView
-            android:id="@+id/recetaFooter"
-            android:text="👤 Usuario • Hoy • 2 pasos"
-            android:textSize="11sp"
-            android:textColor="#666666"
-            android:layout_marginTop="4dp"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/recetaFooter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="👤 Usuario • 2 pasos"
+                android:textSize="11sp"
+                android:textColor="#666666" />
+
+            <TextView
+                android:id="@+id/recetaFooterDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="📅 Hoy"
+                android:textSize="11sp"
+                android:textColor="#666666" />
+
+            <TextView
+                android:id="@+id/tvFooterRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="⭐ 0.0"
+                android:textColor="#666666"
+                android:textSize="11sp"/>
+        </LinearLayout>
+
 
     </LinearLayout>
 </LinearLayout>

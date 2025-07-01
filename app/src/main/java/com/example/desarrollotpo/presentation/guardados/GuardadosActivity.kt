@@ -219,6 +219,7 @@ class GuardadosActivity : BaseActivity() {
 
                 for (i in 0 until jsonArray.length()) {
                     val item = jsonArray.getJSONObject(i)
+                    if (!item.optBoolean("status", false)) continue
                     val name = item.getString("name")
                     val classification = item.getString("classification")
                     val description = item.optString("description", "")
@@ -236,6 +237,9 @@ class GuardadosActivity : BaseActivity() {
                     val image = item.optJSONArray("frontpagePhotos")?.optString(0) ?: ""
 
                     val id = item.getString("_id")
+                    val uploadDate = item.optString("uploadDate", "")
+                    val rating = item.optDouble("rating", 0.0)
+
                     val receta = Receta(
                         id = id,
                         name = name,
@@ -245,8 +249,10 @@ class GuardadosActivity : BaseActivity() {
                         frontImage = image,
                         author = username,
                         stepsCount = steps.length(),
-                        isSaved = true,
-                        status = item.optBoolean("status", false)
+                        isSaved = item.optBoolean("isSaved", false),
+                        status = item.optBoolean("status", false),
+                        uploadDate = uploadDate,
+                        rating = rating
                     )
 
                     recetas.add(receta)

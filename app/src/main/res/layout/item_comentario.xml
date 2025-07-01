@@ -5,15 +5,34 @@
     android:orientation="vertical"
     android:padding="8dp">
 
-    <!-- Nombre del usuario -->
-    <TextView
-        android:id="@+id/autorComentario"
+    <LinearLayout
+        android:id="@+id/layoutAutorFecha"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Autor"
-        android:textStyle="bold"
-        android:textSize="14sp"
-        android:layout_marginBottom="4dp"/>
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp">
+
+        <!-- Nombre del usuario -->
+        <TextView
+            android:id="@+id/autorComentario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Autor"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp"/>
+
+        <!-- Rating -->
+        <TextView
+            android:id="@+id/ratingComentario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:text="⭐ 0.0"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp"/>
+    </LinearLayout>
 
     <!-- Texto del comentario -->
     <TextView

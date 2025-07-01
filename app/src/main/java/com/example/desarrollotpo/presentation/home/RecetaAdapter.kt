@@ -18,6 +18,12 @@ import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
+import java.util.Calendar
+
+
 
 class RecetaAdapter(private val context: Context, private val recetas: List<Receta>) :
     RecyclerView.Adapter<RecetaAdapter.RecetaViewHolder>() {
@@ -31,6 +37,32 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
         val recetaDescripcion: TextView = view.findViewById(R.id.recetaDescripcion)
         val recetaFooter: TextView = view.findViewById(R.id.recetaFooter)
         val recetaEstado: TextView = view.findViewById(R.id.recetaEstado)
+        val recetaFooterDate: TextView = view.findViewById(R.id.recetaFooterDate)
+        val tvFooterRating: TextView = view.findViewById(R.id.tvFooterRating)
+    }
+
+    private fun formatearFecha(isoDateString: String): String {
+        return try {
+            val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US)
+            isoFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val date = isoFormat.parse(isoDateString) ?: return "Fecha desconocida"
+
+            val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+            calendar.time = date
+
+            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+            val recipeYear = calendar.get(Calendar.YEAR)
+
+            val displayFormat = if (recipeYear == currentYear) {
+                SimpleDateFormat("d 'de' MMMM", Locale("es", "ES"))
+            } else {
+                SimpleDateFormat("d 'de' MMMM 'del' yy", Locale("es", "ES"))
+            }
+
+            displayFormat.format(date)
+        } catch (e: Exception) {
+            "Fecha desconocida"
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecetaViewHolder {
@@ -46,6 +78,13 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
         holder.recetaIngredientes.text = "Ingredientes: ${receta.ingredients.joinToString(", ")}"
         holder.recetaDescripcion.text = receta.description
         holder.recetaFooter.text = "👤 ${receta.author} • ${receta.stepsCount} pasos"
+
+// Fecha
+        holder.recetaFooterDate.text = "📅 ${formatearFecha(receta.uploadDate)}"
+
+// Rating
+        holder.tvFooterRating.text = "⭐ %.1f".format(receta.rating)
+
 
         holder.itemView.setOnClickListener {
             val intent = Intent(context, RecetaDetalleActivity::class.java)

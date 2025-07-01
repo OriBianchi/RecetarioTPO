@@ -64,15 +64,36 @@
                 app:layout_constraintTop_toTopOf="@id/tvTituloReceta"
                 app:layout_constraintEnd_toEndOf="parent"/>
 
-            <!-- Autor -->
+            <!-- Contenedor autor + rating en una línea -->
             <TextView
                 android:id="@+id/tvAutor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Por @Autor - 2 pasos"
+                android:text="Por @Autor"
+                android:textSize="14sp"
                 app:layout_constraintTop_toBottomOf="@id/tvTituloReceta"
                 app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="4dp"/>
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/tvRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⭐ 0.0"
+                android:textSize="14sp"
+                android:layout_marginStart="8dp"
+                app:layout_constraintBaseline_toBaselineOf="@id/tvAutor"
+                app:layout_constraintStart_toEndOf="@id/tvAutor" />
+
+            <TextView
+                android:id="@+id/tvFecha"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📅 Fecha"
+                android:textSize="14sp"
+                android:layout_marginStart="8dp"
+                app:layout_constraintBaseline_toBaselineOf="@id/tvRating"
+                app:layout_constraintStart_toEndOf="@id/tvRating" />
 
             <!-- Descripción -->
             <TextView

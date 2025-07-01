@@ -21,6 +21,34 @@ class RecetaDetalleActivity : BaseActivity() {
     private var cantidadPorcion = 1
     private var isSaved = false
 
+    private fun formatearFecha(isoDateString: String): String {
+        return try {
+            val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", java.util.Locale.US)
+            isoFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+
+            // Reemplazamos +00:00 por +0000 para compatibilidad con el patrón Z
+            val fixed = isoDateString.replace("+00:00", "+0000")
+            val date = isoFormat.parse(fixed)
+
+            val ahora = java.util.Calendar.getInstance()
+            val añoActual = ahora.get(java.util.Calendar.YEAR)
+
+            val fecha = java.util.Calendar.getInstance().apply { time = date!! }
+            val añoDeLaFecha = fecha.get(java.util.Calendar.YEAR)
+
+            val displayFormat = if (añoActual == añoDeLaFecha) {
+                java.text.SimpleDateFormat("dd 'de' MMMM", java.util.Locale("es", "ES"))
+            } else {
+                java.text.SimpleDateFormat("dd 'de' MMMM ''yy", java.util.Locale("es", "ES"))
+            }
+
+            displayFormat.format(date)
+        } catch (e: Exception) {
+            "Fecha desconocida"
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_receta_detalle)
@@ -50,16 +78,16 @@ class RecetaDetalleActivity : BaseActivity() {
                 return@setOnClickListener
             }
 
-            enviarComentario(textoComentario)
-
-            if (rating > 0) {
-                enviarRating(rating)
+            if (rating < 1 || rating > 5) {
+                Toast.makeText(this, "Seleccioná una calificación de 1 a 5 estrellas", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+
+            enviarComentario(textoComentario, rating)
 
             runOnUiThread {
                 etComentario.text.clear()
                 ratingBar.rating = 0f
-                Toast.makeText(this, "Comentario enviado!", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -114,6 +142,8 @@ class RecetaDetalleActivity : BaseActivity() {
                 val titulo = json.optString("name", "")
                 val autor = json.optJSONObject("userId")?.optString("username") ?: ""
                 val descripcion = json.optString("description", "")
+                val uploadDate = json.optString("uploadDate", "")
+                val fechaFormateada = formatearFecha(uploadDate)
 
                 ingredientesOriginales.clear()
                 json.optJSONArray("ingredients")?.let { arr ->
@@ -130,12 +160,14 @@ class RecetaDetalleActivity : BaseActivity() {
                     }
                 }
 
-                val comentarios = mutableListOf<Pair<String, String>>()
+                val comentarios = mutableListOf<Comentario>()
                 json.optJSONArray("comments")?.let { arr ->
                     for (i in 0 until arr.length()) {
                         val com = arr.getJSONObject(i)
-                        val autorCom = com.optString("username") ?: "Anon"
-                        comentarios.add(Pair(autorCom, com.optString("text", "")))
+                        val autor = com.optString("username", "Anon")
+                        val texto = com.optString("text", "")
+                        val rating = com.optDouble("rating", 0.0)
+                        comentarios.add(Comentario(autor, texto, rating))
                     }
                 }
 
@@ -145,6 +177,7 @@ class RecetaDetalleActivity : BaseActivity() {
                     findViewById<TextView>(R.id.tvAutor).text = "Por @$autor"
                     findViewById<TextView>(R.id.tvDescripcion).text = descripcion
                     findViewById<TextView>(R.id.tvCantidadPorcion).text = cantidadPorcion.toString()
+                    findViewById<TextView>(R.id.tvFecha).text = "📅 $fechaFormateada"
                     actualizarIngredientes()
                     mostrarPasos(pasos)
                     mostrarComentarios(comentarios)
@@ -194,30 +227,36 @@ class RecetaDetalleActivity : BaseActivity() {
         }
     }
 
-    private fun mostrarComentarios(lista: List<Pair<String, String>>) {
+    private fun mostrarComentarios(lista: List<Comentario>) {
         val contenedor = findViewById<LinearLayout>(R.id.contenedorComentarios)
         contenedor.removeAllViews()
 
         val inflater = layoutInflater
-        lista.forEach { (autor, texto) ->
+        lista.forEach { comentario ->
             val view = inflater.inflate(R.layout.item_comentario, contenedor, false)
 
             val autorView = view.findViewById<TextView>(R.id.autorComentario)
             val textoView = view.findViewById<TextView>(R.id.textoComentario)
+            val ratingView = view.findViewById<TextView>(R.id.ratingComentario)
 
-            autorView.text = autor
-            textoView.text = texto
+            autorView.text = comentario.autor
+            textoView.text = comentario.texto
+            ratingView.text = "⭐ %.1f".format(comentario.rating)
 
             contenedor.addView(view)
         }
     }
 
-    private fun enviarComentario(texto: String) {
+    private fun enviarComentario(texto: String, rating: Int) {
         val client = OkHttpClient()
         val url = "https://desarrolloitpoapi.onrender.com/api/recipes/$recetaId/comment"
         val token = TokenUtils.obtenerToken(this)
 
-        val jsonBody = """{"text": "$texto"}"""
+        val jsonBody = """{
+        "text": "${texto.replace("\"", "\\\"")}",
+        "rating": $rating
+    }"""
+
         val body = jsonBody.toRequestBody("application/json; charset=utf-8".toMediaType())
 
         val request = Request.Builder()
@@ -238,40 +277,6 @@ class RecetaDetalleActivity : BaseActivity() {
                 runOnUiThread {
                     if (response.isSuccessful) {
                         Toast.makeText(this@RecetaDetalleActivity, "Comentario enviado", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this@RecetaDetalleActivity, "Error: ${response.code}", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        })
-    }
-
-    private fun enviarRating(rating: Int) {
-        val client = OkHttpClient()
-        val url = "https://desarrolloitpoapi.onrender.com/api/recipes/$recetaId/rate"
-        val token = TokenUtils.obtenerToken(this)
-
-        val jsonBody = """{"rating": $rating}"""
-        val body = jsonBody.toRequestBody("application/json; charset=utf-8".toMediaType())
-
-        val request = Request.Builder()
-            .url(url)
-            .post(body)
-            .addHeader("Authorization", "Bearer $token")
-            .addHeader("Content-Type", "application/json")
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    Toast.makeText(this@RecetaDetalleActivity, "Error al calificar", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                runOnUiThread {
-                    if (response.isSuccessful) {
-                        Toast.makeText(this@RecetaDetalleActivity, "Calificación enviada", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(this@RecetaDetalleActivity, "Error: ${response.code}", Toast.LENGTH_SHORT).show()
                     }

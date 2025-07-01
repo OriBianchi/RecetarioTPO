@@ -354,16 +354,14 @@ class InicioActivity : BaseActivity() {
                 recetas.clear()
                 for (i in 0 until jsonArray.length()) {
                     val item = jsonArray.getJSONObject(i)
-
                     if (!item.optBoolean("status", false)) continue
-
                     val name = item.getString("name")
                     val classification = item.getString("classification")
                     tiposDisponibles.add(classification)
                     val description = item.optString("description", "")
-                    val ingredientsList = item.optJSONArray("ingredients")
-                    val ingredients = mutableListOf<String>()
 
+                    val ingredients = mutableListOf<String>()
+                    val ingredientsList = item.optJSONArray("ingredients")
                     if (ingredientsList != null) {
                         for (j in 0 until ingredientsList.length()) {
                             val ing = ingredientsList.getJSONObject(j)
@@ -378,6 +376,8 @@ class InicioActivity : BaseActivity() {
                     val steps = item.optJSONArray("steps") ?: JSONArray()
                     val image = item.optJSONArray("frontpagePhotos")?.optString(0) ?: ""
                     val id = item.getString("_id")
+                    val uploadDate = item.optString("uploadDate", "")
+                    val rating = item.optDouble("rating", 0.0)
 
                     val receta = Receta(
                         id = id,
@@ -389,8 +389,11 @@ class InicioActivity : BaseActivity() {
                         author = username,
                         stepsCount = steps.length(),
                         isSaved = item.optBoolean("isSaved", false),
-                        status = item.optBoolean("status", false)
+                        status = item.optBoolean("status", false),
+                        uploadDate = uploadDate,
+                        rating = rating
                     )
+
 
                     recetas.add(receta)
                 }

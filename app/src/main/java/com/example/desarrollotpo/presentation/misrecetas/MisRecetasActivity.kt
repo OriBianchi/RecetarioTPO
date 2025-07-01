@@ -143,9 +143,9 @@ class MisRecetasActivity : BaseActivity() {
                             val classification = item.getString("classification")
                             val description = item.optString("description", "")
                             val steps = item.optJSONArray("steps") ?: JSONArray()
-
-                            val ingredientsList = item.optJSONArray("ingredients")
                             val ingredients = mutableListOf<String>()
+                            val ingredientsList = item.optJSONArray("ingredients")
+
                             if (ingredientsList != null) {
                                 for (j in 0 until ingredientsList.length()) {
                                     val ing = ingredientsList.getJSONObject(j)
@@ -157,8 +157,9 @@ class MisRecetasActivity : BaseActivity() {
 
                             val id = item.getString("_id")
                             val image = item.optJSONArray("frontpagePhotos")?.optString(0) ?: ""
-                            val isSaved = item.optBoolean("isSaved", false)
-                            val status = item.optBoolean("status", false)
+                            val uploadDate = item.optString("uploadDate", "")
+                            val rating = item.optDouble("rating", 0.0)
+                            val username = item.optString("username", "Desconocido")
 
                             val receta = Receta(
                                 id = id,
@@ -167,10 +168,12 @@ class MisRecetasActivity : BaseActivity() {
                                 ingredients = ingredients,
                                 description = description,
                                 frontImage = image,
-                                author = recetaUsername,
+                                author = username,
                                 stepsCount = steps.length(),
-                                isSaved = isSaved,
-                                status = status
+                                isSaved = item.optBoolean("isSaved", false),
+                                status = item.optBoolean("status", false),
+                                uploadDate = uploadDate,
+                                rating = rating
                             )
 
                             recetas.add(receta)
