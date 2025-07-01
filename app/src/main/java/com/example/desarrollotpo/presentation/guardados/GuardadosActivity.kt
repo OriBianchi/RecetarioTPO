@@ -10,6 +10,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.inputmethod.EditorInfo
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,11 +29,13 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
+import android.view.View
 
 class GuardadosActivity : BaseActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: RecetaAdapter
+    private lateinit var loadingSpinner: ProgressBar
     private val recetas = mutableListOf<Receta>()
     private val ingredientesDisponibles = mutableSetOf<String>()
     private var search = ""
@@ -51,6 +54,7 @@ class GuardadosActivity : BaseActivity() {
         }
 
         setContentView(R.layout.activity_guardados)
+        loadingSpinner = findViewById(R.id.loadingSpinner)
         setupBottomNavigation(R.id.nav_Guardados)
 
         recyclerView = findViewById(R.id.recetasRecyclerView)
@@ -161,6 +165,10 @@ class GuardadosActivity : BaseActivity() {
 
     private fun fetchRecetasGuardadas() {
         val client = OkHttpClient()
+        runOnUiThread {
+            loadingSpinner.visibility = View.VISIBLE
+            recyclerView.visibility = View.INVISIBLE
+        }
         val urlBuilder = "https://desarrolloitpoapi.onrender.com/api/recipes"
             .toHttpUrlOrNull()!!.newBuilder()
 
@@ -185,6 +193,8 @@ class GuardadosActivity : BaseActivity() {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
+                    loadingSpinner.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
                     Toast.makeText(this@GuardadosActivity, "Error de red: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -215,8 +225,7 @@ class GuardadosActivity : BaseActivity() {
                             ingredientesDisponibles.add(ing)
                         }
                     }
-                    val user = item.optJSONObject("userId")
-                    val username = user?.optString("username") ?: "Desconocido"
+                    val username = item.optString("username", "Desconocido")
                     val steps = item.optJSONArray("steps") ?: JSONArray()
                     val image = item.optJSONArray("frontpagePhotos")?.optString(0) ?: ""
 
@@ -230,13 +239,17 @@ class GuardadosActivity : BaseActivity() {
                         frontImage = image,
                         author = username,
                         stepsCount = steps.length(),
-                        isSaved = true
+                        isSaved = true,
+                        status = item.optBoolean("status", false)
                     )
+
                     recetas.add(receta)
                 }
 
                 runOnUiThread {
                     adapter.notifyDataSetChanged()
+                    loadingSpinner.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
                 }
             }
         })

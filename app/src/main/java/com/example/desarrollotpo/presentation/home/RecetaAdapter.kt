@@ -2,6 +2,9 @@ package com.example.desarrollotpo.presentation.home
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.BitmapFactory
+import android.util.Base64
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +12,10 @@ import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.example.desarrollotpo.R
 import com.example.desarrollotpo.utils.TokenUtils
-import com.squareup.picasso.Picasso
 import okhttp3.*
-import java.io.IOException
-import android.util.Log
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
 
 class RecetaAdapter(private val context: Context, private val recetas: List<Receta>) :
     RecyclerView.Adapter<RecetaAdapter.RecetaViewHolder>() {
@@ -27,6 +28,7 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
         val recetaIngredientes: TextView = view.findViewById(R.id.recetaIngredientes)
         val recetaDescripcion: TextView = view.findViewById(R.id.recetaDescripcion)
         val recetaFooter: TextView = view.findViewById(R.id.recetaFooter)
+        val recetaEstado: TextView = view.findViewById(R.id.recetaEstado)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecetaViewHolder {
@@ -43,19 +45,32 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
         holder.recetaDescripcion.text = receta.description
         holder.recetaFooter.text = "👤 ${receta.author} • ${receta.stepsCount} pasos"
 
-        // Imagen
-        if (receta.frontImage.isNotBlank()) {
-            Picasso.get()
-                .load(receta.frontImage)
-                .into(holder.recetaImage)
+        // Estado de la receta (Pendiente si no está aprobada)
+        if (!receta.status) {
+            holder.recetaEstado.visibility = View.VISIBLE
+            holder.recetaEstado.text = "Pendiente"
+        } else {
+            holder.recetaEstado.visibility = View.GONE
+        }
+
+        // Imagen desde base64
+        if (!receta.frontImage.isNullOrBlank()) {
+            try {
+                val base64 = receta.frontImage.substringAfter("base64,", "")
+                val imageBytes = Base64.decode(base64, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                holder.recetaImage.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                holder.recetaImage.setImageResource(R.drawable.placeholder)
+                Log.e("RecetaAdapter", "Error decodificando imagen: ${e.message}")
+            }
         } else {
             holder.recetaImage.setImageResource(R.drawable.placeholder)
         }
 
-        // Texto del botón
+        // Botón Guardar / Guardada
         holder.recetaGuardar.text = if (receta.isSaved) "Guardada" else "Guardar"
 
-        // Lógica para guardar o desguardar
         holder.recetaGuardar.setOnClickListener {
             Log.d("DEBUG_RECETA", "Click en receta: ${receta.name} | Guardada: ${receta.isSaved}")
 
@@ -77,14 +92,12 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
                 .addHeader("Content-Type", "application/json")
                 .build()
 
-            // ✅ 1) Marcar cambio al toque (optimistic update)
+            // Optimistic UI update
             receta.isSaved = !receta.isSaved
             holder.recetaGuardar.text = if (receta.isSaved) "Guardada" else "Guardar"
 
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    Log.e("DEBUG_RECETA", "Fallo red: ${e.message}")
-                    // ✅ 2) Si falla, revertir y avisar
                     receta.isSaved = !receta.isSaved
                     (holder.itemView.context as? Activity)?.runOnUiThread {
                         holder.recetaGuardar.text = if (receta.isSaved) "Guardada" else "Guardar"
@@ -93,17 +106,13 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    Log.d("DEBUG_RECETA", "Código respuesta: ${response.code}")
-                    Log.d("DEBUG_RECETA", "Body respuesta: ${response.body?.string()}")
                     if (!response.isSuccessful) {
-                        // ✅ 3) Si el server rechaza, revertir y avisar
                         receta.isSaved = !receta.isSaved
                         (holder.itemView.context as? Activity)?.runOnUiThread {
                             holder.recetaGuardar.text = if (receta.isSaved) "Guardada" else "Guardar"
                             Toast.makeText(holder.itemView.context, "Error al guardar", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        // ✅ 4) Todo OK, opcional: mostrar éxito (si querés)
                         Log.d("DEBUG_RECETA", "Guardado OK")
                     }
                 }

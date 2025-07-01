@@ -6,8 +6,9 @@ data class Receta(
     val classification: String,
     val ingredients: List<String>,
     val description: String,
-    val frontImage: String,
+    val frontImage: String?,
     val author: String,
     val stepsCount: Int,
-    var isSaved: Boolean
+    var isSaved: Boolean,
+    val status: Boolean
 )

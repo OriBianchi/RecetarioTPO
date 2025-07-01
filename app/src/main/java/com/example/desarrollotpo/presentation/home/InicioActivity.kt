@@ -24,12 +24,15 @@ import java.io.IOException
 import android.widget.PopupMenu
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
+import android.widget.ProgressBar
 import com.example.desarrollotpo.utils.setupBottomNavigation
 
 
 class InicioActivity : BaseActivity() {
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var loadingSpinner: ProgressBar
     private lateinit var adapter: RecetaAdapter
     private val recetas = mutableListOf<Receta>()
     private val autoresDisponibles = mutableSetOf<String>()
@@ -44,6 +47,7 @@ class InicioActivity : BaseActivity() {
     private var author = ""
     private var saved = "all"
     private var search = ""
+    private val tiposDisponibles = mutableSetOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +64,7 @@ class InicioActivity : BaseActivity() {
         setupBottomNavigation(R.id.nav_inicio)
 
         recyclerView = findViewById(R.id.recetasRecyclerView)
+        loadingSpinner = findViewById(R.id.loadingSpinner)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = RecetaAdapter(this, recetas)
         recyclerView.adapter = adapter
@@ -233,6 +238,43 @@ class InicioActivity : BaseActivity() {
             builder.setNegativeButton("Cancelar", null)
             builder.show()
         }
+        val chipType = findViewById<Chip>(R.id.chipType)
+        val tiposSeleccionados = mutableSetOf<String>()
+
+        chipType.setOnClickListener {
+            if (tiposDisponibles.isEmpty()) {
+                Toast.makeText(this, "Todavía no se cargaron los tipos", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val tiposArray = tiposDisponibles.sorted().toTypedArray()
+            val seleccionadosTemp = BooleanArray(tiposArray.size) { i ->
+                tiposSeleccionados.contains(tiposArray[i])
+            }
+
+            val builder = android.app.AlertDialog.Builder(this)
+            builder.setTitle("Seleccionar tipos de receta")
+            builder.setMultiChoiceItems(tiposArray, seleccionadosTemp) { _, which, isChecked ->
+                if (isChecked) {
+                    tiposSeleccionados.add(tiposArray[which])
+                } else {
+                    tiposSeleccionados.remove(tiposArray[which])
+                }
+            }
+
+            builder.setPositiveButton("Aplicar") { _, _ ->
+                type = if (tiposSeleccionados.isEmpty()) "all" else tiposSeleccionados.joinToString(",")
+                chipType.text = if (tiposSeleccionados.isEmpty()) {
+                    "Tipo: todo"
+                } else {
+                    "Tipo: ${tiposSeleccionados.joinToString(", ")}"
+                }
+                fetchRecetas()
+            }
+
+            builder.setNegativeButton("Cancelar", null)
+            builder.show()
+        }
 
         cargarIngredientesGlobales()
         fetchRecetas()
@@ -240,6 +282,10 @@ class InicioActivity : BaseActivity() {
 
     private fun fetchRecetas() {
         val client = OkHttpClient()
+        runOnUiThread {
+            loadingSpinner.visibility = View.VISIBLE
+            recyclerView.visibility = View.INVISIBLE
+        }
 
         val urlBuilder = "https://desarrolloitpoapi.onrender.com/api/recipes"
             .toHttpUrlOrNull()!!.newBuilder()
@@ -261,6 +307,8 @@ class InicioActivity : BaseActivity() {
             } else {
                 runOnUiThread {
                     Toast.makeText(this, "Tenés que iniciar sesión para ver guardadas", Toast.LENGTH_SHORT).show()
+                    loadingSpinner.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
                 }
                 return
             }
@@ -280,6 +328,8 @@ class InicioActivity : BaseActivity() {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
                     Toast.makeText(this@InicioActivity, "Error de red: ${e.message}", Toast.LENGTH_SHORT).show()
+                    loadingSpinner.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
                 }
             }
 
@@ -295,12 +345,14 @@ class InicioActivity : BaseActivity() {
                 val jsonArray = jsonObject.getJSONArray("recipes")
 
                 recetas.clear()
-
                 for (i in 0 until jsonArray.length()) {
                     val item = jsonArray.getJSONObject(i)
 
+                    if (!item.optBoolean("status", false)) continue
+
                     val name = item.getString("name")
                     val classification = item.getString("classification")
+                    tiposDisponibles.add(classification)
                     val description = item.optString("description", "")
                     val ingredientsList = item.optJSONArray("ingredients")
                     val ingredients = mutableListOf<String>()
@@ -314,13 +366,11 @@ class InicioActivity : BaseActivity() {
                         }
                     }
 
-                    val user = item.optJSONObject("userId")
-                    val username = user?.optString("username") ?: "Desconocido"
+                    val username = item.optString("username", "Desconocido")
                     autoresDisponibles.add(username)
                     val steps = item.optJSONArray("steps") ?: JSONArray()
                     val image = item.optJSONArray("frontpagePhotos")?.optString(0) ?: ""
                     val id = item.getString("_id")
-                    val isSaved = item.optBoolean("isSaved", false)
 
                     val receta = Receta(
                         id = id,
@@ -331,7 +381,8 @@ class InicioActivity : BaseActivity() {
                         frontImage = image,
                         author = username,
                         stepsCount = steps.length(),
-                        isSaved = isSaved
+                        isSaved = item.optBoolean("isSaved", false),
+                        status = item.optBoolean("status", false)
                     )
 
                     recetas.add(receta)
@@ -339,6 +390,8 @@ class InicioActivity : BaseActivity() {
 
                 runOnUiThread {
                     adapter.notifyDataSetChanged()
+                    loadingSpinner.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
                 }
             }
         })
