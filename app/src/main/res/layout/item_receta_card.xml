@@ -30,17 +30,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
+        <TextView
+            android:id="@+id/recetaEstado"
+            android:background="@drawable/chip_background_red"
+            android:text="Estado"
+            android:padding="4dp"
+            android:textColor="@color/rojoosc"
+            android:textSize="12sp"
+            android:layout_marginEnd="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp">
+            android:layout_marginTop="1dp">
 
             <TextView
                 android:id="@+id/recetaTipo"
                 android:background="@drawable/chip_background"
                 android:text="Tipo"
-                android:padding="4dp"
+                android:padding="5dp"
                 android:textColor="@color/black"
                 android:textSize="12sp"
                 android:layout_marginEnd="6dp"
@@ -55,6 +66,7 @@
                 android:textColor="@color/white"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
+
         </LinearLayout>
 
         <TextView
@@ -82,5 +94,6 @@
             android:layout_marginTop="4dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+
     </LinearLayout>
 </LinearLayout>

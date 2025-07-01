@@ -12,11 +12,8 @@
     <color name="blanco_Fondo">#FEF6FE</color>
     <color name="negro_letra">#1B1A1D</color>
     <color name="negro_Boton">#2c2a1d</color>
-    <color name="secondary">#FF9800</color> <!-- naranja Material por defecto -->
     <color name="lila_Boton">#e2d5f4</color>
-
-
-
-
-
+    <color name="secondary">#FF9800</color>
+    <color name="rojoosc">#701412</color>
+    <color name="rojoclaro">#fab5b4</color>
 </resources>
