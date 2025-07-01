@@ -28,7 +28,7 @@ class PerfilActivity : BaseActivity() {
 
         findViewById<MaterialButton>(R.id.btnLogout).setOnClickListener {
             TokenUtils.borrarToken(this)
-            finish() // opcional: redirigir a LoginActivity
+            finish()
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
