@@ -11,6 +11,10 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 class RecetaDetalleActivity : BaseActivity() {
 
@@ -23,23 +27,20 @@ class RecetaDetalleActivity : BaseActivity() {
 
     private fun formatearFecha(isoDateString: String): String {
         return try {
-            val isoFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", java.util.Locale.US)
-            isoFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+            val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US)
+            isoFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val date = isoFormat.parse(isoDateString) ?: return "Fecha desconocida"
 
-            // Reemplazamos +00:00 por +0000 para compatibilidad con el patrón Z
-            val fixed = isoDateString.replace("+00:00", "+0000")
-            val date = isoFormat.parse(fixed)
+            val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+            calendar.time = date
 
-            val ahora = java.util.Calendar.getInstance()
-            val añoActual = ahora.get(java.util.Calendar.YEAR)
+            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+            val recipeYear = calendar.get(Calendar.YEAR)
 
-            val fecha = java.util.Calendar.getInstance().apply { time = date!! }
-            val añoDeLaFecha = fecha.get(java.util.Calendar.YEAR)
-
-            val displayFormat = if (añoActual == añoDeLaFecha) {
-                java.text.SimpleDateFormat("dd 'de' MMMM", java.util.Locale("es", "ES"))
+            val displayFormat = if (recipeYear == currentYear) {
+                SimpleDateFormat("d 'de' MMMM", Locale("es", "ES"))
             } else {
-                java.text.SimpleDateFormat("dd 'de' MMMM ''yy", java.util.Locale("es", "ES"))
+                SimpleDateFormat("d 'de' MMMM 'del' yy", Locale("es", "ES"))
             }
 
             displayFormat.format(date)
@@ -47,7 +48,6 @@ class RecetaDetalleActivity : BaseActivity() {
             "Fecha desconocida"
         }
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -144,6 +144,7 @@ class RecetaDetalleActivity : BaseActivity() {
                 val descripcion = json.optString("description", "")
                 val uploadDate = json.optString("uploadDate", "")
                 val fechaFormateada = formatearFecha(uploadDate)
+                val rating = json.optDouble("rating", 0.0)
 
                 ingredientesOriginales.clear()
                 json.optJSONArray("ingredients")?.let { arr ->
@@ -178,6 +179,7 @@ class RecetaDetalleActivity : BaseActivity() {
                     findViewById<TextView>(R.id.tvDescripcion).text = descripcion
                     findViewById<TextView>(R.id.tvCantidadPorcion).text = cantidadPorcion.toString()
                     findViewById<TextView>(R.id.tvFecha).text = "📅 $fechaFormateada"
+                    findViewById<TextView>(R.id.tvRating).text = "⭐ %.1f".format(rating)
                     actualizarIngredientes()
                     mostrarPasos(pasos)
                     mostrarComentarios(comentarios)
