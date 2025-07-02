@@ -3,6 +3,7 @@ package com.example.desarrollotpo.presentation.VerReceta
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.*
+import androidx.compose.ui.unit.dp
 import com.example.desarrollotpo.R
 import com.example.desarrollotpo.core.BaseActivity
 import com.example.desarrollotpo.utils.TokenUtils
@@ -15,12 +16,14 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
+import android.view.View
+
 
 class RecetaDetalleActivity : BaseActivity() {
 
     private lateinit var btnGuardar: ImageButton
     private lateinit var recetaId: String
-
+    private lateinit var loaderOverlay: View
     private val ingredientesOriginales = mutableListOf<Ingrediente>()
     private var cantidadPorcion = 1
     private var isSaved = false
@@ -53,6 +56,8 @@ class RecetaDetalleActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_receta_detalle)
 
+        loaderOverlay = findViewById(R.id.loaderOverlay)
+        mostrarLoader()  // <-- lo mostramos ni bien empieza
         recetaId = intent.getStringExtra("RECIPE_ID") ?: ""
         isSaved = intent.getBooleanExtra("IS_SAVED", false)
         btnGuardar = findViewById(R.id.btnGuardar)
@@ -145,6 +150,7 @@ class RecetaDetalleActivity : BaseActivity() {
                 val uploadDate = json.optString("uploadDate", "")
                 val fechaFormateada = formatearFecha(uploadDate)
                 val rating = json.optDouble("rating", 0.0)
+                val isApproved = json.optBoolean("status", false)
 
                 ingredientesOriginales.clear()
                 json.optJSONArray("ingredients")?.let { arr ->
@@ -157,12 +163,22 @@ class RecetaDetalleActivity : BaseActivity() {
                     }
                 }
 
-                val pasos = mutableListOf<String>()
+                val pasos = mutableListOf<Pair<String, List<String>>>()
                 json.optJSONArray("steps")?.let { arr ->
                     for (i in 0 until arr.length()) {
-                        pasos.add(arr.getJSONObject(i).optString("description", ""))
+                        val stepJson = arr.getJSONObject(i)
+                        val description = stepJson.optString("description", "")
+                        val photos = mutableListOf<String>()
+                        stepJson.optJSONArray("photos")?.let { photosArray ->
+                            for (j in 0 until photosArray.length()) {
+                                val photo = photosArray.getJSONObject(j).optString("base64", "")
+                                if (photo.isNotEmpty()) photos.add(photo)
+                            }
+                        }
+                        pasos.add(Pair(description, photos))
                     }
                 }
+
 
                 val comentarios = mutableListOf<Comentario>()
                 json.optJSONArray("comments")?.let { arr ->
@@ -183,13 +199,60 @@ class RecetaDetalleActivity : BaseActivity() {
                     findViewById<TextView>(R.id.tvCantidadPorcion).text = cantidadPorcion.toString()
                     findViewById<TextView>(R.id.tvFecha).text = "📅 $fechaFormateada"
                     findViewById<TextView>(R.id.tvRating).text = "⭐ %.1f".format(rating)
+
+                    val pendienteView = findViewById<TextView>(R.id.tvPendienteAprobacion)
+                    if (isApproved) {
+                        pendienteView.visibility = View.GONE
+                    } else {
+                        pendienteView.visibility = View.VISIBLE
+                    }
+
+                    val seccionComentarios = findViewById<LinearLayout>(R.id.seccionComentarios)
+                    if (isApproved) {
+                        seccionComentarios.visibility = View.VISIBLE
+                    } else {
+                        seccionComentarios.visibility = View.GONE
+                    }
+
+
+                    // Renderizar imagen principal
+                    val imageView = findViewById<ImageView>(R.id.imageReceta)
+                    val frontImage = json.optJSONArray("frontpagePhotos")?.optJSONObject(0)?.optString("base64", "")
+
+                    if (!frontImage.isNullOrEmpty() && frontImage.contains("base64,")) {
+                        try {
+                            val base64Clean = frontImage.substringAfter("base64,").trim()
+                            val imageBytes = android.util.Base64.decode(base64Clean, android.util.Base64.DEFAULT)
+                            val bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                            if (bitmap != null) {
+                                imageView.setImageBitmap(bitmap)
+                            } else {
+                                imageView.setImageResource(R.drawable.placeholder)
+                            }
+                        } catch (e: Exception) {
+                            imageView.setImageResource(R.drawable.placeholder)
+                        }
+                    } else {
+                        imageView.setImageResource(R.drawable.placeholder)
+                    }
+
                     actualizarIngredientes()
                     mostrarPasos(pasos)
                     mostrarComentarios(comentarios)
+                    ocultarLoader()
                 }
             }
         })
     }
+
+    private fun mostrarLoader() {
+        loaderOverlay.visibility = View.VISIBLE
+    }
+
+    private fun ocultarLoader() {
+        loaderOverlay.visibility = View.GONE
+    }
+
 
     private fun actualizarIngredientes() {
         val nuevos = ingredientesOriginales.map {
@@ -222,19 +285,47 @@ class RecetaDetalleActivity : BaseActivity() {
         }
     }
 
-    private fun mostrarPasos(lista: List<String>) {
+    private fun mostrarPasos(lista: List<Pair<String, List<String>>>) {
         val contenedor = findViewById<LinearLayout>(R.id.contenedorPasos)
         contenedor.removeAllViews()
-
         val inflater = layoutInflater
-        lista.forEachIndexed { index, paso ->
+
+        lista.forEachIndexed { index, pasoData ->
+            val (descripcionPaso, imagenesBase64) = pasoData
             val view = inflater.inflate(R.layout.item_paso, contenedor, false)
 
             val titulo = view.findViewById<TextView>(R.id.tituloPaso)
             val descripcion = view.findViewById<TextView>(R.id.descripcionPaso)
+            val contenedorImagenes = view.findViewById<LinearLayout>(R.id.contenedorImagenesPaso)
 
             titulo.text = "Paso ${index + 1}"
-            descripcion.text = paso
+            descripcion.text = descripcionPaso
+
+            // Renderizar imágenes base64
+            contenedorImagenes.removeAllViews()
+            imagenesBase64.forEach { base64 ->
+                val imageView = ImageView(this)
+                val base64Clean = base64.substringAfter("base64,", "")
+                if (base64Clean.isNotEmpty()) {
+                    try {
+                        val bytes = android.util.Base64.decode(base64Clean, android.util.Base64.DEFAULT)
+                        val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                        imageView.setImageBitmap(bitmap)
+                        val layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        layoutParams.topMargin = 8.dp // agregamos margen de 8dp arriba
+                        imageView.layoutParams = layoutParams
+                        imageView.adjustViewBounds = true
+                        imageView.scaleType = ImageView.ScaleType.FIT_CENTER
+                        imageView.scaleType = ImageView.ScaleType.FIT_CENTER
+                        contenedorImagenes.addView(imageView)
+                    } catch (e: Exception) {
+                        // Podés loguearlo si querés
+                    }
+                }
+            }
 
             contenedor.addView(view)
         }
@@ -351,6 +442,9 @@ class RecetaDetalleActivity : BaseActivity() {
             }
         })
     }
+
+    val Int.dp: Int
+        get() = (this * resources.displayMetrics.density).toInt()
 
     private fun actualizarIcono() {
         if (isSaved) {

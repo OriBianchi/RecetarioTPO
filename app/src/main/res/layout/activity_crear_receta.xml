@@ -7,6 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="@color/white"
     tools:context=".presentation.crear.CrearActivity">
 
     <LinearLayout
@@ -35,7 +36,7 @@
             android:id="@+id/imgPororoPlaceholder"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/placeholder"
+            android:src="@drawable/pororo_laptop"
             android:contentDescription="Pororó decorativo"
             android:scaleType="centerInside" />
     </LinearLayout>
@@ -279,4 +280,22 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/loaderOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#88000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusableInTouchMode="true"
+        android:focusable="true"
+        android:elevation="8dp">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

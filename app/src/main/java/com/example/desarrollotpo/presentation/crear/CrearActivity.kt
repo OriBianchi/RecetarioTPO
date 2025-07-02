@@ -49,6 +49,8 @@ class CrearActivity : AppCompatActivity() {
     private lateinit var contenedorMiniaturas: LinearLayout
     private lateinit var tvCantidadFotos: TextView
     private lateinit var iconoErrorFoto: ImageView
+    private lateinit var loaderOverlay: View
+
 
     private var porciones: Int = 1
     private val medidas = listOf("g", "kg", "unidades", "tazas", "ml", "cucharadas", "cucharaditas", "pizca", "litros", "cc")
@@ -137,6 +139,7 @@ class CrearActivity : AppCompatActivity() {
         tvCantidadFotos = findViewById(R.id.tvCantidadFotos)
         contenedorMiniaturas = findViewById(R.id.contenedorMiniaturas)
         iconoErrorFoto = findViewById(R.id.iconoErrorFoto)
+        loaderOverlay = findViewById(R.id.loaderOverlay)
 
         tvTipoSeleccionado.setOnClickListener {
             val builder = AlertDialog.Builder(this)
@@ -480,6 +483,8 @@ class CrearActivity : AppCompatActivity() {
             return
         }
 
+        mostrarLoader() // 👈 Mostrar loader
+
         val bearer = "Bearer $token"
         val client = OkHttpClient()
         val mediaType = "application/json; charset=utf-8".toMediaType()
@@ -495,12 +500,14 @@ class CrearActivity : AppCompatActivity() {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
+                    ocultarLoader() // 👈 Ocultar loader en error
                     Toast.makeText(this@CrearActivity, "Error de red: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
 
             override fun onResponse(call: Call, response: Response) {
                 runOnUiThread {
+                    ocultarLoader() // 👈 Ocultar loader al responder
                     if (response.isSuccessful) {
                         mostrarDialogoConfirmacion()
                     } else {
@@ -512,6 +519,15 @@ class CrearActivity : AppCompatActivity() {
     }
 
     private fun ultimoPasoIndex(): Int = contenedorPasos.childCount - 1
+
+    private fun mostrarLoader() {
+        loaderOverlay.visibility = View.VISIBLE
+    }
+
+    private fun ocultarLoader() {
+        loaderOverlay.visibility = View.GONE
+    }
+
 
     private fun mostrarDialogoConfirmacion() {
         val dialog = AlertDialog.Builder(this)

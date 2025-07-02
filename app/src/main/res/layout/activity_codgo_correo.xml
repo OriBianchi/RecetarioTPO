@@ -36,7 +36,7 @@
         android:layout_width="161dp"
         android:layout_height="152dp"
         android:layout_marginTop="28dp"
-        android:src="@drawable/logo"
+        android:src="@drawable/pororoemail"
         android:contentDescription="Logo de Pororó"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

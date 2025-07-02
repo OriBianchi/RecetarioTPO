@@ -3,6 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    android:background="@color/white"
+
     android:layout_height="match_parent">
 
     <!-- Flecha fija -->
@@ -54,6 +56,19 @@
                 app:layout_constraintEnd_toStartOf="@id/btnGuardar"
                 android:layout_marginTop="12dp"/>
 
+            <TextView
+                android:id="@+id/tvPendienteAprobacion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="⏳ Esta receta aún no fue aprobada por los administradores."
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/tvTituloReceta"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="4dp"/>
+
             <!-- Guardar -->
             <ImageButton
                 android:id="@+id/btnGuardar"
@@ -71,9 +86,9 @@
                 android:layout_height="wrap_content"
                 android:text="Por @Autor"
                 android:textSize="14sp"
-                app:layout_constraintTop_toBottomOf="@id/tvTituloReceta"
+                app:layout_constraintTop_toBottomOf="@id/tvPendienteAprobacion"
                 app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="5dp" />
 
             <TextView
                 android:id="@+id/tvRating"
@@ -198,76 +213,92 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="8dp" />
 
-            <!-- Comentarios -->
-            <TextView
-                android:id="@+id/labelComentarios"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Comentarios"
-                android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/contenedorPasos"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="16dp"/>
-
+            <!-- ENVOLTORIO DE COMENTARIOS -->
             <LinearLayout
-                android:id="@+id/contenedorComentarios"
+                android:id="@+id/seccionComentarios"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@id/labelComentarios"
+                android:visibility="visible"
+                app:layout_constraintTop_toBottomOf="@id/contenedorPasos"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="8dp"
-                android:backgroundTint="@color/azul"/>
+                android:layout_marginTop="16dp">
 
-            <!-- Dejar comentario -->
-            <TextView
-                android:id="@+id/labelNuevoComentario"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Dejar un comentario"
-                android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/contenedorComentarios"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="16dp"/>
+                <TextView
+                    android:id="@+id/labelComentarios"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Comentarios"
+                    android:textStyle="bold"/>
 
-            <RatingBar
-                android:id="@+id/ratingBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:numStars="5"
-                android:stepSize="1.0"
-                app:layout_constraintTop_toBottomOf="@id/labelNuevoComentario"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="8dp"
-                android:progressTint="@color/azul" />
+                <LinearLayout
+                    android:id="@+id/contenedorComentarios"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp"
+                    android:backgroundTint="@color/azul"/>
 
-            <EditText
-                android:id="@+id/etComentario"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:hint="Escribe tu comentario"
-                android:maxLength="100"
-                app:layout_constraintTop_toBottomOf="@id/ratingBar"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="8dp"
-                android:backgroundTint="@color/azul"/>
+                <TextView
+                    android:id="@+id/labelNuevoComentario"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dejar un comentario"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"/>
 
-            <Button
-                android:id="@+id/btnEnviarComentario"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Enviar"
-                app:cornerRadius="24dp"
-                android:backgroundTint="@color/azul"
-                app:layout_constraintTop_toBottomOf="@id/etComentario"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="8dp"/>
+                <RatingBar
+                    android:id="@+id/ratingBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="5"
+                    android:stepSize="1.0"
+                    android:progressTint="@color/azul"
+                    android:layout_gravity="center"
+
+                    android:layout_marginTop="8dp"/>
+
+                <EditText
+                    android:id="@+id/etComentario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Escribe tu comentario"
+                    android:maxLength="100"
+                    android:layout_marginTop="8dp"
+                    android:backgroundTint="@color/azul"/>
+
+                <Button
+                    android:id="@+id/btnEnviarComentario"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enviar"
+                    app:cornerRadius="24dp"
+                    android:backgroundTint="@color/azul"
+                    android:layout_gravity="center"
+
+                    android:layout_marginTop="8dp"/>
+
+            </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <FrameLayout
+        android:id="@+id/loaderOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#88000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="8dp">
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+</FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

@@ -36,7 +36,7 @@
         android:id="@+id/registerInfo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Deberás registrarte en tu computadora en el sitio web www.saborcito.com."
+        android:text="Lo sentimos, por ahora la aplicación no admite registros. Próximamente podrás registrarte en tu computadora en el sitio web www.saborcito.com.ar."
         android:textSize="14sp"
         android:textAlignment="center"
         android:padding="12dp"

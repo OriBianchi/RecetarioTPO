@@ -2,6 +2,7 @@ package com.example.desarrollotpo.presentation.perfil
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.example.desarrollotpo.R
@@ -18,11 +19,14 @@ import androidx.core.view.WindowInsetsCompat
 class PerfilActivity : BaseActivity() {
 
     private val client = OkHttpClient()
+    private lateinit var loaderOverlay: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_perfil)
         setupBottomNavigation(R.id.nav_perfil)
+
+        loaderOverlay = findViewById(R.id.loaderOverlay)
 
         obtenerDatosUsuario()
 
@@ -47,6 +51,8 @@ class PerfilActivity : BaseActivity() {
             return
         }
 
+        mostrarLoader()
+
         val request = Request.Builder()
             .url("https://desarrolloitpoapi.onrender.com/api/auth/me")
             .addHeader("Authorization", "Bearer $token")
@@ -57,11 +63,16 @@ class PerfilActivity : BaseActivity() {
             override fun onFailure(call: Call, e: IOException) {
                 Log.e("Perfil", "Error de red: ${e.message}")
                 runOnUiThread {
+                    ocultarLoader()
                     Toast.makeText(this@PerfilActivity, "Error de conexión", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onResponse(call: Call, response: Response) {
+                runOnUiThread {
+                    ocultarLoader()
+                }
+
                 if (!response.isSuccessful) {
                     Log.e("Perfil", "Respuesta no exitosa: ${response.code}")
                     return
@@ -80,5 +91,13 @@ class PerfilActivity : BaseActivity() {
                 }
             }
         })
+    }
+
+    private fun mostrarLoader() {
+        loaderOverlay.visibility = View.VISIBLE
+    }
+
+    private fun ocultarLoader() {
+        loaderOverlay.visibility = View.GONE
     }
 }
