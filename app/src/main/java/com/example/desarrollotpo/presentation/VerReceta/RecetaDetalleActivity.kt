@@ -21,7 +21,7 @@ class RecetaDetalleActivity : BaseActivity() {
     private lateinit var btnGuardar: ImageButton
     private lateinit var recetaId: String
 
-    private val ingredientesOriginales = mutableListOf<Pair<String, Int>>()
+    private val ingredientesOriginales = mutableListOf<Ingrediente>()
     private var cantidadPorcion = 1
     private var isSaved = false
 
@@ -150,7 +150,10 @@ class RecetaDetalleActivity : BaseActivity() {
                 json.optJSONArray("ingredients")?.let { arr ->
                     for (i in 0 until arr.length()) {
                         val ing = arr.getJSONObject(i)
-                        ingredientesOriginales.add(Pair(ing.getString("name"), ing.optInt("quantity", 1)))
+                        val name = ing.optString("name", "")
+                        val amount = ing.optInt("amount", 0)
+                        val unit = ing.optString("unit", "g") // fallback a gramos si falta
+                        ingredientesOriginales.add(Ingrediente(name, amount, unit))
                     }
                 }
 
@@ -189,11 +192,17 @@ class RecetaDetalleActivity : BaseActivity() {
     }
 
     private fun actualizarIngredientes() {
-        val nuevos = ingredientesOriginales.map { Pair(it.first, "${it.second * cantidadPorcion}g") }
+        val nuevos = ingredientesOriginales.map {
+            Ingrediente(
+                it.name,
+                it.amount * cantidadPorcion,
+                it.unit
+            )
+        }
         mostrarIngredientes(nuevos)
     }
 
-    private fun mostrarIngredientes(lista: List<Pair<String, String>>) {
+    private fun mostrarIngredientes(lista: List<Ingrediente>) {
         val contenedor = findViewById<LinearLayout>(R.id.contenedorIngredientes)
         contenedor.removeAllViews()
 
@@ -203,9 +212,11 @@ class RecetaDetalleActivity : BaseActivity() {
 
             val nombre = view.findViewById<TextView>(R.id.nombreIngrediente)
             val cantidad = view.findViewById<TextView>(R.id.cantidadIngrediente)
+            val unidad = view.findViewById<TextView>(R.id.medidaIngrediente)
 
-            nombre.text = item.first
-            cantidad.text = item.second
+            nombre.text = item.name
+            cantidad.text = item.amount.toString()
+            unidad.text = item.unit
 
             contenedor.addView(view)
         }

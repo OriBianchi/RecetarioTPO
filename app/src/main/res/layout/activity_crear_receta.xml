@@ -9,7 +9,7 @@
     android:fitsSystemWindows="true"
     tools:context=".presentation.crear.CrearActivity">
 
-    <!-- Título fijo arriba -->
+    <!-- Título principal -->
     <TextView
         android:id="@+id/tituloCrear"
         android:layout_width="wrap_content"
@@ -22,9 +22,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp" />
 
-    <!-- Scroll principal debajo del título -->
+    <!-- Scroll principal para el contenido -->
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="0dp"
@@ -38,17 +38,17 @@
 
         <LinearLayout
             android:id="@+id/contenido"
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:paddingBottom="24dp">
 
-            <!-- Campo: Nombre -->
+            <!-- Campo: Nombre (máx. 50 caracteres, una línea) -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Escribe el nombre completo de tu receta:"
-                android:layout_marginTop="16dp"/>
+                android:text="Escribe el título de tu receta (máximo 50 caracteres):"
+                android:layout_marginTop="16dp" />
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -56,15 +56,18 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etNombre"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:maxLength="50"
+                    android:maxLines="1"
+                    android:inputType="textCapWords" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Campo: Descripción -->
+            <!-- Campo: Descripción (máx. 100 caracteres) -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Breve descripción de la receta (máx. 100 caracteres):"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginTop="16dp" />
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -73,45 +76,66 @@
                     android:id="@+id/etDescripcion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:maxLines="3"/>
+                    android:maxLength="100"
+                    android:maxLines="3"
+                    android:inputType="textCapSentences" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Campo: Clasificación -->
+            <!-- Campo: Categoría desplegable -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Selecciona una categoría para tu receta:"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginTop="16dp" />
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tipoDropdownLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Tipo">
-                <AutoCompleteTextView
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/etTipo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none" />
+                    android:inputType="none"
+                    android:dropDownHeight="wrap_content"
+                    android:dropDownVerticalOffset="4dp"
+                    android:dropDownAnchor="@id/tipoDropdownLayout" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Campo: Porciones -->
+            <!-- Campo: Porciones con contador -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="¿Cuántas porciones rinde esta receta? (1 a 30)"
-                android:layout_marginTop="16dp"/>
-            <com.google.android.material.textfield.TextInputLayout
+                android:layout_marginTop="16dp" />
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Porciones">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPorciones"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <!-- Campo: Fotos portada -->
+                <Button
+                    android:id="@+id/btnDecrementarPorciones"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="−" />
+
+                <TextView
+                    android:id="@+id/tvPorciones"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1"
+                    android:textSize="16sp"
+                    android:paddingHorizontal="24dp" />
+
+                <Button
+                    android:id="@+id/btnIncrementarPorciones"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+" />
+            </LinearLayout>
+
+            <!-- Botón para fotos portada -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -127,9 +151,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Agrega los ingredientes necesarios (nombre y gramos):"
-                android:textStyle="bold"
-                android:layout_marginTop="24dp"/>
+                android:text="Agrega los ingredientes necesarios (nombre y medidas):"
+                android:layout_marginTop="24dp" />
             <LinearLayout
                 android:id="@+id/contenedorIngredientes"
                 android:layout_width="match_parent"
@@ -138,30 +161,29 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:gravity="center"
                 android:layout_marginTop="8dp">
                 <Button
                     android:id="@+id/btnAgregarIngrediente"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Agregar un ingrediente" />
+                    android:text="Agregar ingrediente" />
                 <Button
                     android:id="@+id/btnEliminarIngrediente"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Eliminar último ingrediente"
-                    android:textColor="@color/rojoclaro"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/rojoclaro" />
             </LinearLayout>
 
             <!-- Pasos -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Describe los pasos a seguir (pueden incluir fotos):"
-                android:textStyle="bold"
-                android:layout_marginTop="24dp"/>
+                android:text="Describe los pasos a seguir (pueden incluir una foto):"
+                android:layout_marginTop="24dp" />
             <LinearLayout
                 android:id="@+id/contenedorPasos"
                 android:layout_width="match_parent"
@@ -183,11 +205,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Eliminar último paso"
-                    android:textColor="@color/rojoclaro"
-                    android:layout_marginStart="8dp"/>
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/rojoclaro" />
             </LinearLayout>
 
             <!-- Botones de acción -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ten en cuenta que las recetas deberán ser aprobadas por un administrador antes de ser publicadas al resto de los usuarios."
+                android:gravity="center"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -204,7 +233,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Publicar"
-                    android:layout_marginStart="16dp"/>
+                    android:layout_marginStart="16dp" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

@@ -32,8 +32,10 @@ class MisRecetasActivity : BaseActivity() {
     private val recetas = mutableListOf<Receta>()
     private val ingredientesDisponibles = mutableSetOf<String>()
     private var search = ""
+    private lateinit var loader: android.view.View
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
 
         if (!hayConexion()) {
@@ -45,6 +47,7 @@ class MisRecetasActivity : BaseActivity() {
         }
 
         setContentView(R.layout.activity_mis_recetas)
+        loader = findViewById(R.id.progressLoader)
         setupBottomNavigation(R.id.nav_mis_recetas)
 
         recyclerView = findViewById(R.id.recetasRecyclerView)
@@ -66,8 +69,10 @@ class MisRecetasActivity : BaseActivity() {
     }
 
     private fun fetchMisRecetas() {
+        loader.visibility = android.view.View.VISIBLE  // 👈 Mostrar loader
         val token = TokenUtils.obtenerToken(this)
         if (token.isEmpty()) {
+            loader.visibility = android.view.View.GONE  // 👈 Ocultar si no hay token
             Toast.makeText(this, "Debés iniciar sesión para ver tus recetas", Toast.LENGTH_SHORT).show()
             return
         }
@@ -84,6 +89,7 @@ class MisRecetasActivity : BaseActivity() {
         client.newCall(userRequest).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
+                    loader.visibility = android.view.View.GONE // 👈 Ocultar
                     Toast.makeText(this@MisRecetasActivity, "Error obteniendo usuario", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -115,6 +121,7 @@ class MisRecetasActivity : BaseActivity() {
                 client.newCall(recipesRequest).enqueue(object : Callback {
                     override fun onFailure(call: Call, e: IOException) {
                         runOnUiThread {
+                            loader.visibility = android.view.View.GONE // 👈 Ocultar
                             Toast.makeText(this@MisRecetasActivity, "Error al cargar recetas", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -180,6 +187,7 @@ class MisRecetasActivity : BaseActivity() {
                         }
 
                         runOnUiThread {
+                            loader.visibility = android.view.View.GONE // 👈 Ocultar
                             adapter.notifyDataSetChanged()
                         }
                     }
