@@ -25,6 +25,8 @@ import android.widget.PopupMenu
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import com.example.desarrollotpo.utils.setupBottomNavigation
 
@@ -135,13 +137,26 @@ class InicioActivity : BaseActivity() {
         val chipAuthor = findViewById<Chip>(R.id.chipAuthor)
         val autoresSeleccionados = mutableSetOf<String>()
 
+        val btnFiltros = findViewById<ImageButton>(R.id.btnFiltros)
+        val filtersContainer = findViewById<LinearLayout>(R.id.filtersContainer)
+
+        btnFiltros.setOnClickListener {
+            if (filtersContainer.visibility == View.GONE) {
+                filtersContainer.visibility = View.VISIBLE
+            } else {
+                filtersContainer.visibility = View.GONE
+            }
+        }
+
+
+
         chipInclude.setOnClickListener {
             if (ingredientesDisponibles.isEmpty()) {
                 Toast.makeText(this, "Todavía no se cargaron los ingredientes", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val ingredientesArray = ingredientesDisponibles.sorted().toTypedArray()
+            val ingredientesArray = ingredientesDisponibles.sortedBy { it.lowercase() }.toTypedArray()
             val seleccionadosTemp = BooleanArray(ingredientesArray.size) { i ->
                 ingredientesSeleccionados.contains(ingredientesArray[i])
             }
@@ -176,7 +191,7 @@ class InicioActivity : BaseActivity() {
                 return@setOnClickListener
             }
 
-            val ingredientesArray = ingredientesDisponibles.sorted().toTypedArray()
+            val ingredientesArray = ingredientesDisponibles.sortedBy { it.lowercase() }.toTypedArray()
             val seleccionadosTemp = BooleanArray(ingredientesArray.size) { i ->
                 ingredientesAExcluir.contains(ingredientesArray[i])
             }
@@ -211,7 +226,7 @@ class InicioActivity : BaseActivity() {
                 return@setOnClickListener
             }
 
-            val autoresArray = autoresDisponibles.sorted().toTypedArray()
+            val autoresArray = autoresDisponibles.sortedBy { it.lowercase() }.toTypedArray()
             val seleccionadosTemp = BooleanArray(autoresArray.size) { i ->
                 autoresSeleccionados.contains(autoresArray[i])
             }
@@ -248,7 +263,7 @@ class InicioActivity : BaseActivity() {
                 return@setOnClickListener
             }
 
-            val tiposArray = tiposDisponibles.sorted().toTypedArray()
+            val tiposArray = tiposDisponibles.sortedBy { it.lowercase() }.toTypedArray()
             val seleccionadosTemp = BooleanArray(tiposArray.size) { i ->
                 tiposSeleccionados.contains(tiposArray[i])
             }
@@ -299,9 +314,18 @@ class InicioActivity : BaseActivity() {
 
         urlBuilder.addQueryParameter("sortBy", sortBy)
         urlBuilder.addQueryParameter("sortOrder", sortOrder)
-        urlBuilder.addQueryParameter("type", type)
-        urlBuilder.addQueryParameter("ingredient", include)
-        urlBuilder.addQueryParameter("excludeIngredient", exclude)
+        if (type != "all") {
+            urlBuilder.addQueryParameter("classification", type)
+        }
+
+        if (include.isNotEmpty()) {
+            urlBuilder.addQueryParameter("ingredient", include)
+        }
+
+        if (exclude.isNotEmpty()) {
+            urlBuilder.addQueryParameter("excludeIngredient", exclude)
+        }
+
         urlBuilder.addQueryParameter("createdBy", author)
         urlBuilder.addQueryParameter("name", search)
 
