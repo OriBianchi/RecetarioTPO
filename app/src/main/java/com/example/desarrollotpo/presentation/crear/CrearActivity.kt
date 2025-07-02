@@ -48,7 +48,7 @@ class CrearActivity : AppCompatActivity() {
     private lateinit var btnElegirFotos: Button
     private lateinit var contenedorMiniaturas: LinearLayout
     private lateinit var tvCantidadFotos: TextView
-
+    private lateinit var iconoErrorFoto: ImageView
 
     private var porciones: Int = 1
     private val medidas = listOf("g", "kg", "unidades", "tazas", "ml", "cucharadas", "cucharaditas", "pizca", "litros", "cc")
@@ -136,6 +136,7 @@ class CrearActivity : AppCompatActivity() {
         btnElegirFotos = findViewById(R.id.btnElegirFotosPortada)
         tvCantidadFotos = findViewById(R.id.tvCantidadFotos)
         contenedorMiniaturas = findViewById(R.id.contenedorMiniaturas)
+        iconoErrorFoto = findViewById(R.id.iconoErrorFoto)
 
         tvTipoSeleccionado.setOnClickListener {
             val builder = AlertDialog.Builder(this)
@@ -170,6 +171,20 @@ class CrearActivity : AppCompatActivity() {
                 val json = construirJsonReceta()
                 enviarReceta(json)
             }
+        }
+
+        findViewById<Button>(R.id.btnCancelar).setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("¿Cancelar receta?")
+                .setMessage("Se perderá toda la información ingresada. ¿Estás seguro que querés cancelar?")
+                .setPositiveButton("Sí") { _, _ ->
+                    val intent = Intent(this, com.example.desarrollotpo.presentation.home.InicioActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
+                    finish()
+                }
+                .setNegativeButton("No", null)
+                .show()
         }
 
     }
@@ -242,41 +257,58 @@ class CrearActivity : AppCompatActivity() {
     }
 
     private fun validarFormulario(): Boolean {
+        val errores = mutableListOf<String>()
         var valido = true
 
-        // Validar título
         val etTitulo = findViewById<EditText>(R.id.etNombre)
+        val etDescripcion = findViewById<EditText>(R.id.etDescripcion)
+        val errorTextView = findViewById<TextView>(R.id.tvErroresFormulario)
+
+        // Validar título
         val titulo = etTitulo.text.toString().trim()
         if (titulo.isEmpty()) {
             etTitulo.error = "El título es obligatorio"
+            errores.add("• El título es obligatorio.")
             valido = false
         } else if (titulo.length > 50) {
             etTitulo.error = "Máximo 50 caracteres"
+            errores.add("• El título no debe superar los 50 caracteres.")
             valido = false
         }
 
         // Validar descripción
-        val etDescripcion = findViewById<EditText>(R.id.etDescripcion)
         val descripcion = etDescripcion.text.toString().trim()
         if (descripcion.isEmpty()) {
             etDescripcion.error = "La descripción es obligatoria"
+            errores.add("• La descripción es obligatoria.")
             valido = false
         } else if (descripcion.length > 100) {
             etDescripcion.error = "Máximo 100 caracteres"
+            errores.add("• La descripción no debe superar los 100 caracteres.")
             valido = false
         }
 
-        // Validar tipo
-        if (tvTipoSeleccionado.text.isNullOrBlank() || tvTipoSeleccionado.text == "Seleccionar tipo") {
-            tvTipoSeleccionado.error = "Seleccioná una categoría"
+        // Validar categoría (tipo)
+        if (tvTipoSeleccionado.text.isNullOrBlank() || tvTipoSeleccionado.text == "Seleccionar" || !categorias.contains(tvTipoSeleccionado.text.toString())) {
+            tvTipoSeleccionado.setBackgroundResource(R.drawable.borde_rojo) // Asegurate de tener este drawable
+            errores.add("• Seleccioná una categoría de receta.")
             valido = false
         } else {
-            tvTipoSeleccionado.error = null
+            tvTipoSeleccionado.background = null
+        }
+
+        // Validar fotos de portada
+        if (imagenesBase64.isEmpty()) {
+            errores.add("• Seleccioná al menos una foto de portada.")
+            iconoErrorFoto.visibility = View.VISIBLE
+            valido = false
+        } else {
+            iconoErrorFoto.visibility = View.GONE
         }
 
         // Validar ingredientes
         if (contenedorIngredientes.childCount == 0) {
-            Toast.makeText(this, "Agregá al menos un ingrediente", Toast.LENGTH_SHORT).show()
+            errores.add("• Agregá al menos un ingrediente.")
             valido = false
         } else {
             for (i in 0 until contenedorIngredientes.childCount) {
@@ -287,24 +319,27 @@ class CrearActivity : AppCompatActivity() {
 
                 if (etNombre.text.isNullOrBlank()) {
                     etNombre.error = "Requerido"
+                    errores.add("• Completá el nombre del ingrediente ${i + 1}.")
                     valido = false
                 }
                 if (etCantidad.text.isNullOrBlank()) {
                     etCantidad.error = "Requerido"
+                    errores.add("• Completá la cantidad del ingrediente ${i + 1}.")
                     valido = false
                 }
-                if (unidad.text.isNullOrBlank() || unidad.text == "Unidad") {
-                    unidad.error = "Seleccioná unidad"
+                if (unidad.text.isNullOrBlank() || unidad.text == "Seleccionar") {
+                    unidad.setBackgroundResource(R.drawable.borde_rojo)
+                    errores.add("• Seleccioná una unidad para el ingrediente ${i + 1}.")
                     valido = false
                 } else {
-                    unidad.error = null
+                    unidad.background = null
                 }
             }
         }
 
         // Validar pasos
         if (contenedorPasos.childCount == 0) {
-            Toast.makeText(this, "Agregá al menos un paso", Toast.LENGTH_SHORT).show()
+            errores.add("• Agregá al menos un paso.")
             valido = false
         } else {
             for (i in 0 until contenedorPasos.childCount) {
@@ -313,9 +348,18 @@ class CrearActivity : AppCompatActivity() {
 
                 if (etDescripcionPaso.text.isNullOrBlank()) {
                     etDescripcionPaso.error = "Este paso necesita una descripción"
+                    errores.add("• El paso ${i + 1} necesita una descripción.")
                     valido = false
                 }
             }
+        }
+
+        if (!valido) {
+            errorTextView.visibility = View.VISIBLE
+            errorTextView.text = errores.joinToString("\n")
+        } else {
+            errorTextView.visibility = View.GONE
+            errorTextView.text = ""
         }
 
         return valido
@@ -435,10 +479,9 @@ class CrearActivity : AppCompatActivity() {
             Toast.makeText(this, "No se encontró un token. Iniciá sesión.", Toast.LENGTH_LONG).show()
             return
         }
+
         val bearer = "Bearer $token"
-
         val client = OkHttpClient()
-
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val body = RequestBody.create(mediaType, json.toString())
 
@@ -459,8 +502,7 @@ class CrearActivity : AppCompatActivity() {
             override fun onResponse(call: Call, response: Response) {
                 runOnUiThread {
                     if (response.isSuccessful) {
-                        Toast.makeText(this@CrearActivity, "Receta enviada con éxito", Toast.LENGTH_LONG).show()
-                        finish()
+                        mostrarDialogoConfirmacion()
                     } else {
                         Toast.makeText(this@CrearActivity, "Error ${response.code}: ${response.message}", Toast.LENGTH_LONG).show()
                     }
@@ -470,6 +512,22 @@ class CrearActivity : AppCompatActivity() {
     }
 
     private fun ultimoPasoIndex(): Int = contenedorPasos.childCount - 1
+
+    private fun mostrarDialogoConfirmacion() {
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Receta enviada")
+            .setMessage("Tu receta fue enviada. Deberá ser aprobada por los administradores del sitio antes de que pueda ser visualizada por otros usuarios.")
+            .setPositiveButton("OK") { _, _ ->
+                val intent = Intent(this, com.example.desarrollotpo.presentation.home.InicioActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+                finish()
+            }
+            .setCancelable(false)
+            .create()
+
+        dialog.show()
+    }
 
     private fun uriToBitmap(uri: Uri): Bitmap {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -490,7 +548,7 @@ class CrearActivity : AppCompatActivity() {
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
         val bytes = stream.toByteArray()
-        if (bytes.size > 3 * 1024 * 1024) throw IllegalArgumentException("Imagen supera los 3MB")
-        return "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
+        if (bytes.size > 2 * 1024 * 1024) throw IllegalArgumentException("Imagen supera los 2MB")
+        return Base64.encodeToString(bytes, Base64.NO_WRAP)
     }
 }

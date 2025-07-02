@@ -100,21 +100,31 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
         } else {
             holder.recetaEstado.visibility = View.GONE
         }
+        val rawImage = receta.frontImage.orEmpty()
 
-        // Imagen desde base64
-        if (!receta.frontImage.isNullOrBlank()) {
+        if (rawImage.contains("base64,")) {
             try {
-                val base64 = receta.frontImage.substringAfter("base64,", "")
-                val imageBytes = Base64.decode(base64, Base64.DEFAULT)
+                val base64Clean = rawImage.substringAfter("base64,").trim()
+                Log.d("RecetaAdapter", "Base64 recortado (primeros 100): ${base64Clean.take(100)}")
+
+                val imageBytes = Base64.decode(base64Clean, Base64.DEFAULT)
                 val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                holder.recetaImage.setImageBitmap(bitmap)
+
+                if (bitmap != null) {
+                    holder.recetaImage.setImageBitmap(bitmap)
+                } else {
+                    Log.e("RecetaAdapter", "Bitmap es null después de decodificar")
+                    holder.recetaImage.setImageResource(R.drawable.placeholder)
+                }
             } catch (e: Exception) {
-                holder.recetaImage.setImageResource(R.drawable.placeholder)
                 Log.e("RecetaAdapter", "Error decodificando imagen: ${e.message}")
+                holder.recetaImage.setImageResource(R.drawable.placeholder)
             }
         } else {
+            Log.e("RecetaAdapter", "No contiene base64, string recibido: ${rawImage.take(50)}")
             holder.recetaImage.setImageResource(R.drawable.placeholder)
         }
+
 
         // Botón Guardar / Guardada
         holder.recetaGuardar.text = if (receta.isSaved) "Guardada" else "Guardar"
