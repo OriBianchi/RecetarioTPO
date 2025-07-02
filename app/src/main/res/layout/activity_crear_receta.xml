@@ -92,14 +92,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Tipo">
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                    android:id="@+id/etTipo"
+                <TextView
+                    android:id="@+id/tvTipoSeleccionado"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:dropDownHeight="wrap_content"
-                    android:dropDownVerticalOffset="4dp"
-                    android:dropDownAnchor="@id/tipoDropdownLayout" />
+                    android:padding="12dp"
+                    android:background="@color/grisclaro"
+                    android:drawableEnd="@drawable/arrow_drop_down_24px"
+                    android:text="Seleccionar"
+                    android:textColor="@color/black"
+                    android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Campo: Porciones con contador -->
@@ -141,11 +143,36 @@
                 android:layout_height="wrap_content"
                 android:text="Selecciona de 1 a 3 fotos de portada para tu receta:"
                 android:layout_marginTop="16dp" />
-            <Button
-                android:id="@+id/btnElegirFotosPortada"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Elegir fotos" />
+                android:orientation="horizontal"
+                android:gravity="start|center_vertical">
+
+                <Button
+                    android:id="@+id/btnElegirFotosPortada"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Elegir fotos" />
+
+                <TextView
+                    android:id="@+id/tvCantidadFotos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(0 seleccionadas)"
+                    android:layout_marginStart="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Miniaturas de imágenes seleccionadas -->
+            <LinearLayout
+                android:id="@+id/contenedorMiniaturas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp" />
 
             <!-- Ingredientes -->
             <TextView
@@ -158,25 +185,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_marginTop="8dp">
-                <Button
-                    android:id="@+id/btnAgregarIngrediente"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Agregar ingrediente" />
-                <Button
-                    android:id="@+id/btnEliminarIngrediente"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Eliminar último ingrediente"
-                    android:layout_marginStart="8dp"
-                    android:textColor="@color/rojoclaro" />
-            </LinearLayout>
 
             <!-- Pasos -->
             <TextView
@@ -189,25 +197,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginTop="8dp">
-                <Button
-                    android:id="@+id/btnAgregarPaso"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Agregar un paso" />
-                <Button
-                    android:id="@+id/btnEliminarPaso"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Eliminar último paso"
-                    android:layout_marginStart="8dp"
-                    android:textColor="@color/rojoclaro" />
-            </LinearLayout>
+
 
             <!-- Botones de acción -->
             <TextView

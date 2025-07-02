@@ -1,0 +1,122 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:layout_marginBottom="16dp">
+
+    <!-- Título del paso -->
+    <TextView
+        android:id="@+id/tvPasoNumero"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Paso 1"
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+    <!-- Campo de descripción del paso -->
+    <EditText
+        android:id="@+id/etDescripcionPaso"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Describe este paso"
+        android:maxLength="250"
+        android:inputType="textMultiLine"
+        android:minLines="3"
+        android:gravity="top"
+        android:layout_marginTop="8dp" />
+
+    <!-- Botón + contador de imágenes -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/btnAgregarImagenPaso"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Agregar Imagen (Opcional)" />
+
+        <TextView
+            android:id="@+id/tvCantidadImagenesPaso"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="(0 seleccionadas)" />
+    </LinearLayout>
+
+    <!-- Miniaturas -->
+    <LinearLayout
+        android:id="@+id/contenedorImagenesPaso"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp" />
+
+    <!-- Contenedor de los botones Agregar / Eliminar -->
+    <LinearLayout
+        android:id="@+id/contenedorBotonesPaso"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="12dp">
+
+        <!-- Bloque Borrar paso -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginEnd="24dp">
+
+            <ImageButton
+                android:id="@+id/btnEliminarPaso"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/delete_24px"
+                android:contentDescription="Eliminar Paso"
+                android:visibility="gone"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/rojoosc" />
+
+            <TextView
+                android:id="@+id/tvEliminarPaso"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:text="Borrar paso"
+                android:textSize="12sp"
+                android:textColor="@color/rojoosc" />
+        </LinearLayout>
+
+        <!-- Bloque Agregar paso -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/btnAgregarPaso"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/add_circle_24px"
+                android:contentDescription="Agregar Paso"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/black" />
+
+            <TextView
+                android:id="@+id/tvAgregarPaso"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Agregar paso"
+                android:textSize="12sp"
+                android:textColor="@color/black" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

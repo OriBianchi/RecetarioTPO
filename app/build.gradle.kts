@@ -62,8 +62,11 @@ dependencies {
     implementation ("androidx.compose.material:material-icons-extended:1.6.1")
 
     // UI
+    implementation ("androidx.activity:activity-ktx:1.8.2")
+    implementation ("androidx.core:core-ktx:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.android.material:material:1.10.0")
+    implementation ("com.google.android.material:material:1.12.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

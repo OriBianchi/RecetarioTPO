@@ -3,73 +3,126 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingVertical="8dp"
-    android:gravity="center_vertical">
+    android:orientation="vertical"
+    android:padding="8dp">
 
-    <!-- Ingrediente (nombre) -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="0dp"
-        android:layout_weight="2"
+    <!-- Contenedor horizontal para los campos -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:hint="Ingrediente">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etIngrediente"
-            android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Campo Ingrediente -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="2"
             android:layout_height="wrap_content"
-            android:maxLength="20"
-            android:inputType="textCapWords" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="vertical"
+            android:layout_marginEnd="8dp">
 
-    <!-- Cantidad -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:hint="Cantidad">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etCantidad"
-            android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ingrediente"
+                android:textSize="12sp"
+                android:textColor="@color/black" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etIngrediente"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLength="20"
+                    android:inputType="textCapWords" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- Campo Cantidad -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:maxLength="5"
-            android:inputType="numberDecimal" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="vertical"
+            android:layout_marginEnd="8dp">
 
-    <!-- Unidad (dropdown) -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="0dp"
-        android:layout_weight="1.5"
-        android:layout_height="wrap_content"
-        android:hint="Medida"
-        android:layout_marginEnd="8dp">
-        <AutoCompleteTextView
-            android:id="@+id/etUnidad"
-            android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cantidad"
+                android:textSize="12sp"
+                android:textColor="@color/black" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCantidad"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLength="5"
+                    android:inputType="numberDecimal" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- Campo Unidad (convertido a TextView clickeable para usar un diálogo) -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1.5"
             android:layout_height="wrap_content"
-            android:inputType="none"
-            android:dropDownHeight="wrap_content" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="vertical"
+            android:layout_marginEnd="8dp">
 
-    <!-- Botón eliminar -->
-    <ImageButton
-        android:id="@+id/btnEliminarIngrediente"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/delete_24px"
-        android:contentDescription="Eliminar ingrediente"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:visibility="gone"
-        app:tint="@color/rojoosc" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Medida"
 
-    <!-- Botón agregar -->
-    <ImageButton
-        android:id="@+id/btnAgregarIngrediente"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/add_circle_24px"
-        android:contentDescription="Agregar ingrediente"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        app:tint="@color/black" />
+                android:textSize="12sp"
+                android:textColor="@color/black" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/etUnidad"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/grisclaro"
+                    android:padding="12dp"
+                    android:drawableEnd="@drawable/arrow_drop_down_24px"
+                    android:drawableRight="@drawable/arrow_drop_down_24px"
+                    android:inputType="none"
+                    android:text="Seleccionar"
+                    android:textColor="@color/black" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+
+        <!-- Botón Eliminar -->
+        <ImageButton
+            android:id="@+id/btnEliminarIngrediente"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/delete_24px"
+            android:contentDescription="Eliminar ingrediente"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:visibility="gone"
+            app:tint="@color/rojoosc" />
+
+        <!-- Botón Agregar -->
+        <ImageButton
+            android:id="@+id/btnAgregarIngrediente"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/add_circle_24px"
+            android:contentDescription="Agregar ingrediente"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/black" />
+    </LinearLayout>
 </LinearLayout>
