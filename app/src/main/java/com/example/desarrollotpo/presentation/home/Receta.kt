@@ -12,5 +12,8 @@ data class Receta(
     var isSaved: Boolean,
     val status: Boolean,
     val uploadDate: String,
-    val rating: Double
+    val rating: Double,
+    val portions: Int,
+    val stepsJson: String,
+    val ingredientsJson: String
 )

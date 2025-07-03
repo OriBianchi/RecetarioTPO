@@ -56,7 +56,7 @@ class CrearActivity : AppCompatActivity() {
     private val medidas = listOf("g", "kg", "unidades", "tazas", "ml", "cucharadas", "cucharaditas", "pizca", "litros", "cc")
     private val categorias = listOf("Desayuno", "Almuerzo", "Cena", "Merienda", "Snack", "Vegano", "Vegetariano", "Sin TACC", "Otro")
     private val imagenesBase64 = mutableListOf<String>()
-    private val maxImages = 3
+    private val fotosPasosBase64 = mutableListOf<MutableList<String>>()
     private var pasoViewSeleccionadoParaImagen: View? = null
 
     private val launcherImagenesPaso = registerForActivityResult(
@@ -67,13 +67,19 @@ class CrearActivity : AppCompatActivity() {
             val tvCantidad = pasoView.findViewById<TextView>(R.id.tvCantidadImagenesPaso)
 
             contenedorImagenes.removeAllViews()
-            val seleccionadas = uris.take(2)
-            tvCantidad.text = "(${seleccionadas.size} seleccionadas)"
+            val indexPaso = contenedorPasos.indexOfChild(pasoView)
+            if (indexPaso >= fotosPasosBase64.size) {
+                fotosPasosBase64.add(mutableListOf())
+            } else {
+                fotosPasosBase64[indexPaso] = mutableListOf()
+            }
 
-            for (uri in seleccionadas) {
+            for (uri in uris) {
                 val bitmap = uriToBitmap(uri)
                 val compressed = compressBitmap(bitmap, 90)
                 val base64 = bitmapToBase64(compressed)
+
+                fotosPasosBase64[indexPaso].add(base64) // guarda base64
 
                 val imageView = ImageView(this).apply {
                     layoutParams = LinearLayout.LayoutParams(200, 200).apply {
@@ -88,12 +94,12 @@ class CrearActivity : AppCompatActivity() {
     }
 
 
-    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri> ->
+    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         imagenesBase64.clear()
         contenedorMiniaturas.removeAllViews()
 
-        uris.take(maxImages).forEach { uri ->
-            val bitmap = uriToBitmap(uri)
+        uri?.let {
+            val bitmap = uriToBitmap(it)
             val compressed = compressBitmap(bitmap, 90)
 
             try {
@@ -114,21 +120,12 @@ class CrearActivity : AppCompatActivity() {
             }
         }
 
-        tvCantidadFotos.text = "(${imagenesBase64.size} seleccionadas)"
+        tvCantidadFotos.text = "(${imagenesBase64.size} seleccionada)"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_crear_receta)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-
-        setupBottomNavigation(R.id.nav_crear)
-
         tvPorciones = findViewById(R.id.tvPorciones)
         btnIncrementar = findViewById(R.id.btnIncrementarPorciones)
         btnDecrementar = findViewById(R.id.btnDecrementarPorciones)
@@ -140,6 +137,56 @@ class CrearActivity : AppCompatActivity() {
         contenedorMiniaturas = findViewById(R.id.contenedorMiniaturas)
         iconoErrorFoto = findViewById(R.id.iconoErrorFoto)
         loaderOverlay = findViewById(R.id.loaderOverlay)
+        val recetaId = intent.getStringExtra("RECIPE_ID")
+        val recetaPortions = intent.getIntExtra("RECIPE_PORTIONS", 1)
+        val recetaFrontImage = intent.getStringExtra("RECIPE_FRONT_IMAGE")
+        val recetaStepsJson = intent.getStringExtra("RECIPE_STEPS_JSON")
+        val recetaNombre = intent.getStringExtra("RECIPE_NAME")
+        val recetaDescripcion = intent.getStringExtra("RECIPE_DESCRIPTION")
+        val recetaTipo = intent.getStringExtra("RECIPE_TYPE")
+        val recetaIngredientes = intent.getStringArrayExtra("RECIPE_INGREDIENTS") ?: arrayOf()
+        val recetaIngredientesJson = intent.getStringExtra("RECIPE_INGREDIENTS_JSON")
+        val btnEliminar = findViewById<Button>(R.id.btnEliminar)
+
+
+
+
+
+        if (!recetaId.isNullOrEmpty()) {
+            traerRecetaParaEditar(recetaId)
+            val tituloPantalla = findViewById<TextView>(R.id.tituloCrear)
+            tituloPantalla.text = "Editando Receta"
+        } else {
+            // Modo crear: agregar uno por defecto
+            agregarIngrediente()
+            agregarPaso()
+        }
+
+        if (!recetaId.isNullOrEmpty()) {
+            btnEliminar.visibility = View.VISIBLE
+
+            btnEliminar.setOnClickListener {
+                AlertDialog.Builder(this)
+                    .setTitle("¿Eliminar receta?")
+                    .setMessage("¿Estás segura que querés eliminar esta receta? Esta acción no se puede deshacer.")
+                    .setPositiveButton("SÍ") { _, _ ->
+                        eliminarReceta(recetaId)
+                    }
+                    .setNegativeButton("NO", null)
+                    .show()
+            }
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+        setupBottomNavigation(R.id.nav_crear)
+
+
+
 
         tvTipoSeleccionado.setOnClickListener {
             val builder = AlertDialog.Builder(this)
@@ -166,15 +213,20 @@ class CrearActivity : AppCompatActivity() {
             tvPorciones.text = porciones.toString()
         }
 
-        agregarIngrediente()
-        agregarPaso()
+
 
         findViewById<Button>(R.id.btnPublicar).setOnClickListener {
             if (validarFormulario()) {
                 val json = construirJsonReceta()
-                enviarReceta(json)
+                if (recetaId.isNullOrEmpty()) {
+                    enviarReceta(json) // Crea nueva
+                } else {
+                    actualizarReceta(recetaId, json) // Actualiza existente
+                }
             }
         }
+
+
 
         findViewById<Button>(R.id.btnCancelar).setOnClickListener {
             AlertDialog.Builder(this)
@@ -225,20 +277,12 @@ class CrearActivity : AppCompatActivity() {
             val view = contenedorPasos.getChildAt(i)
             val descripcionPaso = view.findViewById<EditText>(R.id.etDescripcionPaso).text.toString().trim()
 
-            val contenedorImagenes = view.findViewById<LinearLayout>(R.id.contenedorImagenesPaso)
             val fotosPasoArray = JSONArray()
-            for (j in 0 until contenedorImagenes.childCount) {
-                val imageView = contenedorImagenes.getChildAt(j) as ImageView
-                imageView.drawable?.let { drawable ->
-                    val bitmap = imageView.drawable.toBitmap()
-                    val compressed = compressBitmap(bitmap, 90)
-                    val base64 = bitmapToBase64(compressed)
-
-                    val foto = JSONObject()
-                    foto.put("data", base64)
-                    foto.put("contentType", "image/jpeg")
-                    fotosPasoArray.put(foto)
-                }
+            for (base64 in fotosPasosBase64.getOrNull(i) ?: emptyList()) {
+                val foto = JSONObject()
+                foto.put("data", base64)
+                foto.put("contentType", "image/jpeg")
+                fotosPasoArray.put(foto)
             }
 
             val pasoJson = JSONObject()
@@ -427,16 +471,19 @@ class CrearActivity : AppCompatActivity() {
         val inflater = LayoutInflater.from(this)
         val pasoView = inflater.inflate(R.layout.item_paso_receta, contenedorPasos, false)
 
+        fotosPasosBase64.add(mutableListOf()) // 💥 Asegura lista para este paso
+
         val btnAgregar = pasoView.findViewById<ImageButton>(R.id.btnAgregarPaso)
         val btnEliminar = pasoView.findViewById<ImageButton>(R.id.btnEliminarPaso)
         val btnAgregarImagen = pasoView.findViewById<Button>(R.id.btnAgregarImagenPaso)
-        val tvPaso = pasoView.findViewById<TextView>(R.id.tvPasoNumero)
 
         val tvAgregarPaso = pasoView.findViewById<TextView>(R.id.tvAgregarPaso)
         val tvEliminarPaso = pasoView.findViewById<TextView>(R.id.tvEliminarPaso)
 
         btnAgregar.setOnClickListener { agregarPaso() }
         btnEliminar.setOnClickListener {
+            val index = contenedorPasos.indexOfChild(pasoView)
+            fotosPasosBase64.removeAt(index)
             contenedorPasos.removeView(pasoView)
             actualizarIndicesPasos()
         }
@@ -444,7 +491,6 @@ class CrearActivity : AppCompatActivity() {
             pasoViewSeleccionadoParaImagen = pasoView
             launcherImagenesPaso.launch("image/*")
         }
-
 
         contenedorPasos.addView(pasoView)
         actualizarIndicesPasos()
@@ -508,6 +554,226 @@ class CrearActivity : AppCompatActivity() {
             override fun onResponse(call: Call, response: Response) {
                 runOnUiThread {
                     ocultarLoader() // 👈 Ocultar loader al responder
+                    if (response.isSuccessful) {
+                        mostrarDialogoConfirmacion()
+                    } else {
+                        Toast.makeText(this@CrearActivity, "Error ${response.code}: ${response.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        })
+    }
+
+    private fun eliminarReceta(id: String) {
+        val token = TokenUtils.obtenerToken(this)
+        if (token.isEmpty()) {
+            Toast.makeText(this, "No se encontró un token. Iniciá sesión.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        mostrarLoader()
+
+        val bearer = "Bearer $token"
+        val client = OkHttpClient()
+
+        val request = Request.Builder()
+            .url("https://desarrolloitpoapi.onrender.com/api/recipes/$id")
+            .addHeader("Authorization", bearer)
+            .delete()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    ocultarLoader()
+                    Toast.makeText(this@CrearActivity, "Error de red: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                runOnUiThread {
+                    ocultarLoader()
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@CrearActivity, "Receta eliminada", Toast.LENGTH_LONG).show()
+                        finish()
+                    } else {
+                        Toast.makeText(this@CrearActivity, "Error ${response.code}: ${response.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        })
+    }
+    private fun traerRecetaParaEditar(id: String) {
+
+        val token = TokenUtils.obtenerToken(this)
+        val client = OkHttpClient()
+
+        val request = Request.Builder()
+            .url("https://desarrolloitpoapi.onrender.com/api/recipes/$id")
+            .addHeader("Authorization", "Bearer $token")
+            .get()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(this@CrearActivity, "Error de red: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (!response.isSuccessful) {
+                    runOnUiThread {
+                        Toast.makeText(this@CrearActivity, "Error ${response.code}", Toast.LENGTH_LONG).show()
+                    }
+                    return
+                }
+
+                val json = JSONObject(response.body?.string() ?: "")
+
+                Log.d("DEBUG", "JSON respuesta: $json")
+                runOnUiThread {
+                    llenarCamposParaEditar(json)
+                }
+            }
+        })
+    }
+
+    private fun llenarCamposParaEditar(json: JSONObject) {
+        val name = json.optString("name", "")
+        val description = json.optString("description", "")
+        val classification = json.optString("classification", "")
+        val portions = json.optInt("portions", 1)
+        val portadaFull = json.optJSONArray("frontpagePhotos")?.optJSONObject(0)?.optString("base64", "")
+        val portada = portadaFull?.substringAfter(",")
+
+        Log.d("DEBUG", "Portada base64: ${portada?.take(100)}")
+
+        findViewById<EditText>(R.id.etNombre).setText(name)
+        findViewById<EditText>(R.id.etDescripcion).setText(description)
+        tvTipoSeleccionado.text = classification
+        tvTipoSeleccionado.setTypeface(null, Typeface.BOLD)
+        porciones = portions
+        tvPorciones.text = porciones.toString()
+
+        if (!portada.isNullOrEmpty()) {
+            Log.d("DEBUG", "Portada detectada, largo: ${portada.length}")
+            imagenesBase64.clear()
+            imagenesBase64.add(portada)
+
+            val bytes = Base64.decode(portada, Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+
+            val imageView = ImageView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(200, 200).apply {
+                    setMargins(8, 8, 8, 8)
+                }
+                setImageBitmap(bitmap)
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            }
+
+            contenedorMiniaturas.removeAllViews()
+            contenedorMiniaturas.addView(imageView)
+            tvCantidadFotos.text = "(${imagenesBase64.size} seleccionada)"
+        }
+
+        // Ingredientes
+        contenedorIngredientes.removeAllViews()
+        val ingredients = json.optJSONArray("ingredients") ?: JSONArray()
+        for (i in 0 until ingredients.length()) {
+            val ing = ingredients.getJSONObject(i)
+            val nombre = ing.optString("name", "")
+            val cantidad = ing.optDouble("amount", 0.0)
+            val unidad = ing.optString("unit", "")
+
+            agregarIngrediente()
+            val view = contenedorIngredientes.getChildAt(contenedorIngredientes.childCount - 1)
+            view.findViewById<EditText>(R.id.etIngrediente).setText(nombre)
+            view.findViewById<EditText>(R.id.etCantidad).setText(cantidad.toString())
+            view.findViewById<TextView>(R.id.etUnidad).text = unidad
+        }
+
+        // Pasos
+        contenedorPasos.removeAllViews()
+        fotosPasosBase64.clear()
+        val steps = json.optJSONArray("steps") ?: JSONArray()
+        for (i in 0 until steps.length()) {
+            val paso = steps.getJSONObject(i)
+            val desc = paso.optString("description", "")
+            val fotos = paso.optJSONArray("photos") ?: JSONArray()
+
+            agregarPaso()
+            val pasoView = contenedorPasos.getChildAt(i)
+            pasoView.findViewById<EditText>(R.id.etDescripcionPaso).setText(desc)
+
+            val contenedorImagenes = pasoView.findViewById<LinearLayout>(R.id.contenedorImagenesPaso)
+            contenedorImagenes.removeAllViews()
+
+            for (j in 0 until fotos.length()) {
+                val foto = fotos.getJSONObject(j)
+
+                // ⚡️ Usa data o base64 según lo que venga
+                val base64 = when {
+                    foto.has("data") -> foto.optString("data", "")
+                    foto.has("base64") -> foto.optString("base64", "")
+                    else -> ""
+                }
+
+                if (base64.isBlank()) {
+                    Log.d("DEBUG", "Paso $i, foto $j está VACÍA → la salto")
+                    continue
+                }
+
+                val cleanBase64 = base64.substringAfter(",")
+                fotosPasosBase64[i].add(cleanBase64)
+
+                val bytes = Base64.decode(cleanBase64, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+
+                val imageView = ImageView(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(200, 200).apply {
+                        setMargins(8, 8, 8, 8)
+                    }
+                    setImageBitmap(bitmap)
+                    scaleType = ImageView.ScaleType.CENTER_CROP
+                }
+                contenedorImagenes.addView(imageView)
+            }
+        }
+    }
+
+    private fun actualizarReceta(id: String, json: JSONObject) {
+        val token = TokenUtils.obtenerToken(this)
+        if (token.isEmpty()) {
+            Toast.makeText(this, "No se encontró un token. Iniciá sesión.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        mostrarLoader()
+
+        val bearer = "Bearer $token"
+        val client = OkHttpClient()
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        val body = RequestBody.create(mediaType, json.toString())
+
+        val request = Request.Builder()
+            .url("https://desarrolloitpoapi.onrender.com/api/recipes/$id")
+            .addHeader("Authorization", bearer)
+            .addHeader("Content-Type", "application/json")
+            .put(body)
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    ocultarLoader()
+                    Toast.makeText(this@CrearActivity, "Error de red: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                runOnUiThread {
+                    ocultarLoader()
                     if (response.isSuccessful) {
                         mostrarDialogoConfirmacion()
                     } else {

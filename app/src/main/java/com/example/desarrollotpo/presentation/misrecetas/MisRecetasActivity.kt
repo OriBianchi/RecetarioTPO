@@ -63,7 +63,7 @@ class MisRecetasActivity : BaseActivity() {
 
         recyclerView = findViewById(R.id.recetasRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = RecetaAdapter(this, recetas)
+        adapter = RecetaAdapter(this, recetas, esMisRecetas = true)
         recyclerView.adapter = adapter
 
         val chipOrder = findViewById<Chip>(R.id.chipOrder)
@@ -272,6 +272,9 @@ class MisRecetasActivity : BaseActivity() {
                             val uploadDate = item.optString("uploadDate", "")
                             val rating = item.optDouble("rating", 0.0)
                             val username = item.optString("username", "Desconocido")
+                            val portions = item.optInt("portions", 1)
+                            val stepsJson = steps.toString()
+                            val ingredientsJson = ingredientsList.toString()
 
 
                             val receta = Receta(
@@ -286,7 +289,10 @@ class MisRecetasActivity : BaseActivity() {
                                 isSaved = item.optBoolean("isSaved", false),
                                 status = item.optBoolean("status", false),
                                 uploadDate = uploadDate,
-                                rating = rating
+                                rating = rating,
+                                portions = portions,
+                                stepsJson = stepsJson,
+                                ingredientsJson = ingredientsJson
                             )
 
                             recetas.add(receta)

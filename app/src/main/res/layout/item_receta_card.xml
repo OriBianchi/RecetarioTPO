@@ -21,14 +21,32 @@
         android:layout_height="wrap_content"
         android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/recetaTitle"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:text="Título"
-            android:textColor="@color/black"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+        <!-- NUEVO LinearLayout horizontal SOLO para el título y el botón edit -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/recetaTitle"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:text="Título"
+                android:textColor="@color/black"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+
+            <ImageButton
+                android:id="@+id/btnEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit"
+                android:contentDescription="Botón Editar"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp"/>
+        </LinearLayout>
 
         <TextView
             android:id="@+id/recetaEstado"

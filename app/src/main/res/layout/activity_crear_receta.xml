@@ -26,7 +26,7 @@
             android:id="@+id/tituloCrear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Creando receta"
+            android:text="Creando Receta"
             android:textStyle="bold"
             android:textSize="20sp"
             android:textColor="@color/negro_letra"
@@ -168,7 +168,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Selecciona de 1 a 3 fotos de portada para tu receta:"
+                android:text="Selecciona una foto de portada para tu receta:"
                 android:layout_marginTop="16dp" />
             <LinearLayout
                 android:id="@+id/layoutFotosPortada"
@@ -181,7 +181,7 @@
                     android:id="@+id/btnElegirFotosPortada"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Elegir fotos" />
+                    android:text="Elegir foto" />
 
                 <ImageView
                     android:id="@+id/iconoErrorFoto"
@@ -256,7 +256,19 @@
                     android:id="@+id/btnCancelar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    app:backgroundTint="@android:color/holo_red_dark"
                     android:text="Cancelar" />
+                <Button
+                    android:id="@+id/btnEliminar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Eliminar"
+                    android:layout_marginStart="16dp"
+                    android:backgroundTint="@color/white"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:visibility="gone"
+                    />
+
                 <Button
                     android:id="@+id/btnPublicar"
                     android:layout_width="wrap_content"

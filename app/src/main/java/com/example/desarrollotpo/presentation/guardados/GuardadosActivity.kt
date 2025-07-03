@@ -394,6 +394,9 @@ class GuardadosActivity : BaseActivity() {
                     val id = item.getString("_id")
                     val uploadDate = item.optString("uploadDate", "")
                     val rating = item.optDouble("rating", 0.0)
+                    val portions = item.optInt("portions", 1)
+                    val stepsJson = item.optJSONArray("steps")?.toString() ?: "[]"
+                    val ingredientsJson = ingredientsList.toString()
 
                     val receta = Receta(
                         id = id,
@@ -407,7 +410,10 @@ class GuardadosActivity : BaseActivity() {
                         isSaved = item.optBoolean("isSaved", false),
                         status = item.optBoolean("status", false),
                         uploadDate = uploadDate,
-                        rating = rating
+                        rating = rating,
+                        portions = portions,
+                        stepsJson = stepsJson,
+                        ingredientsJson = ingredientsJson
                     )
 
                     recetas.add(receta)

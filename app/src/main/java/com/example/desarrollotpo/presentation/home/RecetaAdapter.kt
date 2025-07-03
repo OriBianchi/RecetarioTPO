@@ -13,6 +13,7 @@ import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
 import com.example.desarrollotpo.R
 import com.example.desarrollotpo.presentation.VerReceta.RecetaDetalleActivity
+import com.example.desarrollotpo.presentation.crear.CrearActivity
 import com.example.desarrollotpo.utils.TokenUtils
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -25,7 +26,7 @@ import java.util.Calendar
 
 
 
-class RecetaAdapter(private val context: Context, private val recetas: List<Receta>) :
+class RecetaAdapter(private val context: Context, private val recetas: List<Receta>, private val esMisRecetas: Boolean = false) :
     RecyclerView.Adapter<RecetaAdapter.RecetaViewHolder>() {
 
     class RecetaViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -39,6 +40,7 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
         val recetaEstado: TextView = view.findViewById(R.id.recetaEstado)
         val recetaFooterDate: TextView = view.findViewById(R.id.recetaFooterDate)
         val tvFooterRating: TextView = view.findViewById(R.id.tvFooterRating)
+        val btnEdit: ImageButton = view.findViewById(R.id.btnEdit)
     }
 
     private fun formatearFecha(isoDateString: String): String {
@@ -102,6 +104,12 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
         }
         val rawImage = receta.frontImage.orEmpty()
 
+        if (esMisRecetas) {
+            holder.btnEdit.visibility = View.VISIBLE
+        } else {
+            holder.btnEdit.visibility = View.GONE
+        }
+
         if (rawImage.contains("base64,")) {
             try {
                 val base64Clean = rawImage.substringAfter("base64,").trim()
@@ -123,6 +131,12 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
         } else {
             Log.e("RecetaAdapter", "No contiene base64, string recibido: ${rawImage.take(50)}")
             holder.recetaImage.setImageResource(R.drawable.placeholder)
+        }
+        holder.btnEdit.setOnClickListener {
+            val intent = Intent(context, CrearActivity::class.java)
+            intent.putExtra("RECIPE_ID", receta.id)
+            context.startActivity(intent)
+
         }
 
 
