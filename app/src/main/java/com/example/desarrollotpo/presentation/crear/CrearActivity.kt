@@ -369,9 +369,11 @@ class CrearActivity : AppCompatActivity() {
                     errores.add("• Completá el nombre del ingrediente ${i + 1}.")
                     valido = false
                 }
-                if (etCantidad.text.isNullOrBlank()) {
-                    etCantidad.error = "Requerido"
-                    errores.add("• Completá la cantidad del ingrediente ${i + 1}.")
+                val cantidad = etCantidad.text.toString().toDoubleOrNull() ?: 0.0
+
+                if (cantidad <= 0) {
+                    etCantidad.error = "Debe ser mayor a 0"
+                    errores.add("• La cantidad del ingrediente ${i + 1} debe ser mayor a 0.")
                     valido = false
                 }
                 if (unidad.text.isNullOrBlank() || unidad.text == "Seleccionar") {

@@ -2,6 +2,6 @@ package com.example.desarrollotpo.presentation.VerReceta
 
 data class Ingrediente(
     val name: String,
-    val amount: Int,
+    val amount: Double,
     val unit: String
 )

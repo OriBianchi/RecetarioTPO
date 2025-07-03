@@ -27,6 +27,7 @@ class RecetaDetalleActivity : BaseActivity() {
     private val ingredientesOriginales = mutableListOf<Ingrediente>()
     private var cantidadPorcion = 1
     private var isSaved = false
+    private var porcionesOriginales = 1
 
     private fun formatearFecha(isoDateString: String): String {
         return try {
@@ -151,13 +152,15 @@ class RecetaDetalleActivity : BaseActivity() {
                 val fechaFormateada = formatearFecha(uploadDate)
                 val rating = json.optDouble("rating", 0.0)
                 val isApproved = json.optBoolean("status", false)
+                porcionesOriginales = json.optInt("portions", 1)
+                cantidadPorcion = porcionesOriginales
 
                 ingredientesOriginales.clear()
                 json.optJSONArray("ingredients")?.let { arr ->
                     for (i in 0 until arr.length()) {
                         val ing = arr.getJSONObject(i)
                         val name = ing.optString("name", "")
-                        val amount = ing.optInt("amount", 0)
+                        val amount = ing.optDouble("amount", 0.0)
                         val unit = ing.optString("unit", "g") // fallback a gramos si falta
                         ingredientesOriginales.add(Ingrediente(name, amount, unit))
                     }
@@ -258,7 +261,7 @@ class RecetaDetalleActivity : BaseActivity() {
         val nuevos = ingredientesOriginales.map {
             Ingrediente(
                 it.name,
-                it.amount * cantidadPorcion,
+                it.amount * cantidadPorcion / porcionesOriginales,
                 it.unit
             )
         }
@@ -278,7 +281,7 @@ class RecetaDetalleActivity : BaseActivity() {
             val unidad = view.findViewById<TextView>(R.id.medidaIngrediente)
 
             nombre.text = item.name
-            cantidad.text = item.amount.toString()
+            cantidad.text = String.format("%.2f", item.amount).trimEnd('0').trimEnd('.')
             unidad.text = item.unit
 
             contenedor.addView(view)
