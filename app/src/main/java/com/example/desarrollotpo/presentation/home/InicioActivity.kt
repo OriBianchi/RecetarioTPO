@@ -42,8 +42,8 @@ class InicioActivity : BaseActivity() {
     private val ingredientesDisponibles = mutableSetOf<String>()
 
     // Filtros
-    private var sortBy = "uploadDate"
-    private var sortOrder = "desc"
+    private var sortBy = "name"
+    private var sortOrder = "asc"
     private var type = "all"
     private var include = ""
     private var exclude = ""

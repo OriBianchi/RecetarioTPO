@@ -407,10 +407,11 @@ class RecetaDetalleActivity : BaseActivity() {
             override fun onResponse(call: Call, response: Response) {
                 runOnUiThread {
                     if (response.isSuccessful) {
-                        Toast.makeText(this@RecetaDetalleActivity, "Comentario enviado", Toast.LENGTH_SHORT).show()
+                        mostrarDialogoComentarioEnviado()
                     } else {
                         Toast.makeText(this@RecetaDetalleActivity, "Error: ${response.code}", Toast.LENGTH_SHORT).show()
                     }
+
                 }
             }
         })
@@ -577,6 +578,20 @@ class RecetaDetalleActivity : BaseActivity() {
             }
         })
     }
+    private fun mostrarDialogoComentarioEnviado() {
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setTitle("Comentario enviado")
+            .setMessage("Tu comentario fue enviado correctamente. Deberá ser aprobado por los administradores antes de que sea visible para otros usuarios.")
+            .setPositiveButton("OK") { _, _ ->
+                // Acción tras confirmar: podés solo cerrar o recargar comentarios
+                finish()
+            }
+            .setCancelable(false)
+            .create()
+
+        dialog.show()
+    }
+
 
 
 }

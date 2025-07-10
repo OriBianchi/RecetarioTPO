@@ -44,8 +44,8 @@ class GuardadosActivity : BaseActivity() {
     private var search = ""
     private var include = ""
     private var exclude = ""
-    private var sortBy = "uploadDate"
-    private var sortOrder = "desc"
+    private var sortBy = "name"
+    private var sortOrder = "asc"
     private var type = "all"
     private var author = ""
     private val tiposDisponibles = mutableSetOf<String>()

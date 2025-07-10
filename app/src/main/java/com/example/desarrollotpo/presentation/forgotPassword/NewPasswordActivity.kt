@@ -61,6 +61,13 @@ class NewPasswordActivity : BaseActivity() {
                 Toast.makeText(this, "La contraseña debe tener al menos 6 caracteres", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            val permitido = "^[a-zA-Z0-9@#\$%^&+=!?.]*$".toRegex()
+            if (!permitido.matches(password) || !permitido.matches(repetir)) {
+                Toast.makeText(this, "La contraseña solo puede tener letras, números y símbolos comunes", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+
 
             if (password != repetir) {
                 Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()

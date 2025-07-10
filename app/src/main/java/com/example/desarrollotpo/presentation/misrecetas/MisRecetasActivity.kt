@@ -40,8 +40,8 @@ class MisRecetasActivity : BaseActivity() {
     private val ingredientesDisponibles = mutableSetOf<String>()
     private var search = ""
     private lateinit var loader: android.view.View
-    private var sortBy = "uploadDate"
-    private var sortOrder = "desc"
+    private var sortBy = "name"
+    private var sortOrder = "asc"
     private var type = "all"
     private val tiposDisponibles = mutableSetOf<String>()
 
@@ -175,6 +175,7 @@ class MisRecetasActivity : BaseActivity() {
             return
         }
 
+        recetas.clear()
         val client = OkHttpClient()
 
         val userRequest = Request.Builder()
@@ -314,4 +315,9 @@ class MisRecetasActivity : BaseActivity() {
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
+    override fun onResume() {
+        super.onResume()
+        fetchMisRecetas()
+    }
+
 }

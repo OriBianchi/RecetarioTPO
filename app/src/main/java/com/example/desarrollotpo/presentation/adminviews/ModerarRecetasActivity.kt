@@ -196,4 +196,9 @@ class ModerarRecetasActivity : BaseActivity() {
     private fun ocultarLoader() {
         loaderOverlay.visibility = View.GONE
     }
+    override fun onResume() {
+        super.onResume()
+        cargarRecetasPendientes()
+    }
+
 }
