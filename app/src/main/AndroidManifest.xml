@@ -48,6 +48,8 @@
         <activity android:name=".presentation.forgotPassword.NewPasswordActivity" /> <!-- Registro de usuario -->
         <activity android:name=".presentation.register.RegisterFormActivity" /> <!-- Pantalla offline -->
         <activity android:name=".presentation.common.SinInternetActivity" />
+        <activity android:name=".presentation.adminviews.ModerarComentariosActivity" />
+        <activity android:name=".presentation.adminviews.ModerarRecetasActivity" />
     </application>
 
 </manifest>

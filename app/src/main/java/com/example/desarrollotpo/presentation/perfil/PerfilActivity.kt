@@ -1,5 +1,6 @@
 package com.example.desarrollotpo.presentation.perfil
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -15,6 +16,8 @@ import org.json.JSONObject
 import java.io.IOException
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.desarrollotpo.presentation.adminviews.ModerarComentariosActivity
+import com.example.desarrollotpo.presentation.adminviews.ModerarRecetasActivity
 
 class PerfilActivity : BaseActivity() {
 
@@ -87,7 +90,20 @@ class PerfilActivity : BaseActivity() {
                 runOnUiThread {
                     findViewById<TextView>(R.id.tvUsername).text = username
                     findViewById<TextView>(R.id.tvUserType).text = "Tipo: ${if (role == "admin") "Admin" else "Usuario"}"
-                    findViewById<TextView>(R.id.tvRecipeCount).text = "Recetas guardadas: $cantidad"
+
+                    val adminButtons = findViewById<View>(R.id.adminButtonsContainer)
+
+                    if (role == "admin") {
+                        adminButtons.visibility = View.VISIBLE
+
+                        findViewById<MaterialButton>(R.id.btnModerarRecetas).setOnClickListener {
+                            startActivity(Intent(this@PerfilActivity, ModerarRecetasActivity::class.java))
+                        }
+
+                        findViewById<MaterialButton>(R.id.btnModerarComentarios).setOnClickListener {
+                            startActivity(Intent(this@PerfilActivity, ModerarComentariosActivity::class.java))
+                        }
+                    }
                 }
             }
         })

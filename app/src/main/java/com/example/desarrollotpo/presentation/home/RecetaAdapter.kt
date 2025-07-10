@@ -23,8 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 import java.util.Calendar
-
-
+import com.example.desarrollotpo.presentation.adminviews.ModerarRecetasActivity
 
 class RecetaAdapter(private val context: Context, private val recetas: List<Receta>, private val esMisRecetas: Boolean = false) :
     RecyclerView.Adapter<RecetaAdapter.RecetaViewHolder>() {
@@ -104,11 +103,14 @@ class RecetaAdapter(private val context: Context, private val recetas: List<Rece
         }
         val rawImage = receta.frontImage.orEmpty()
 
+// Por defecto: ocultar siempre el botón editar
+        holder.btnEdit.visibility = View.GONE
+
+// Solo mostrar en Mis Recetas
         if (esMisRecetas) {
             holder.btnEdit.visibility = View.VISIBLE
-        } else {
-            holder.btnEdit.visibility = View.GONE
         }
+
 
         if (rawImage.contains("base64,")) {
             try {

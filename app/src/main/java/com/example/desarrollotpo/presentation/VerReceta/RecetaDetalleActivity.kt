@@ -28,6 +28,7 @@ class RecetaDetalleActivity : BaseActivity() {
     private var cantidadPorcion = 1
     private var isSaved = false
     private var porcionesOriginales = 1
+    private var userRole: String = "user"
 
     private fun formatearFecha(isoDateString: String): String {
         return try {
@@ -63,6 +64,8 @@ class RecetaDetalleActivity : BaseActivity() {
         isSaved = intent.getBooleanExtra("IS_SAVED", false)
         btnGuardar = findViewById(R.id.btnGuardar)
         actualizarIcono()
+
+        verificarRolYcargarReceta()
 
         cargarReceta()
 
@@ -122,6 +125,7 @@ class RecetaDetalleActivity : BaseActivity() {
                 guardarReceta()
             }
         }
+
     }
 
     private fun cargarReceta() {
@@ -242,6 +246,26 @@ class RecetaDetalleActivity : BaseActivity() {
                     actualizarIngredientes()
                     mostrarPasos(pasos)
                     mostrarComentarios(comentarios)
+
+                    val layoutModeracion = findViewById<LinearLayout>(R.id.layoutModeracionAdmin)
+                    val btnAprobar = findViewById<Button>(R.id.btnAprobarAdmin)
+                    val btnRechazar = findViewById<Button>(R.id.btnRechazarAdmin)
+
+                    if (userRole == "admin" && !isApproved) {
+                        layoutModeracion.visibility = View.VISIBLE
+
+                        btnAprobar.setOnClickListener {
+                            aprobarReceta(recetaId)
+                        }
+
+                        btnRechazar.setOnClickListener {
+                            rechazarReceta(recetaId)
+                        }
+                    } else {
+                        layoutModeracion.visibility = View.GONE
+                    }
+
+
                     ocultarLoader()
                 }
             }
@@ -456,4 +480,103 @@ class RecetaDetalleActivity : BaseActivity() {
             btnGuardar.setImageResource(R.drawable.baseline_bookmark_border_24)
         }
     }
+
+    private fun aprobarReceta(recipeId: String) {
+        mostrarLoader()
+
+        val token = TokenUtils.obtenerToken(this)
+        val request = Request.Builder()
+            .url("https://desarrolloitpoapi.onrender.com/api/recipes/$recipeId/approve")
+            .patch(RequestBody.create(null, ByteArray(0)))
+            .addHeader("Authorization", "Bearer $token")
+            .build()
+
+        OkHttpClient().newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    ocultarLoader()
+                    Toast.makeText(this@RecetaDetalleActivity, "Error al aprobar receta", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                runOnUiThread {
+                    ocultarLoader()
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@RecetaDetalleActivity, "Receta aprobada", Toast.LENGTH_SHORT).show()
+                        finish()
+                    } else {
+                        Toast.makeText(this@RecetaDetalleActivity, "Error al aprobar", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
+    }
+
+    private fun rechazarReceta(recipeId: String) {
+        mostrarLoader()
+
+        val token = TokenUtils.obtenerToken(this)
+        val request = Request.Builder()
+            .url("https://desarrolloitpoapi.onrender.com/api/recipes/$recipeId/reject")
+            .delete()
+            .addHeader("Authorization", "Bearer $token")
+            .build()
+
+        OkHttpClient().newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    ocultarLoader()
+                    Toast.makeText(this@RecetaDetalleActivity, "Error al rechazar receta", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                runOnUiThread {
+                    ocultarLoader()
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@RecetaDetalleActivity, "Receta rechazada", Toast.LENGTH_SHORT).show()
+                        finish()
+                    } else {
+                        Toast.makeText(this@RecetaDetalleActivity, "Error al rechazar", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
+    }
+
+    private fun verificarRolYcargarReceta() {
+        val token = TokenUtils.obtenerToken(this)
+        if (token.isEmpty()) {
+            cargarReceta() // sin token, seguimos sin rol
+            return
+        }
+
+        val request = Request.Builder()
+            .url("https://desarrolloitpoapi.onrender.com/api/auth/me")
+            .addHeader("Authorization", "Bearer $token")
+            .build()
+
+        OkHttpClient().newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(this@RecetaDetalleActivity, "Error al verificar rol", Toast.LENGTH_SHORT).show()
+                    cargarReceta()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    val body = response.body?.string() ?: ""
+                    val json = JSONObject(body)
+                    userRole = json.optString("role", "user")
+                }
+                runOnUiThread {
+                    cargarReceta()
+                }
+            }
+        })
+    }
+
+
 }

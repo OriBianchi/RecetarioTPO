@@ -17,13 +17,68 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_margin="16dp"/>
 
+    <LinearLayout
+        android:id="@+id/layoutModeracionAdmin"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:background="@color/secondary"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/backInicio"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tvMensajeModeracion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Esta receta sigue pendiente de moderación."
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/btnRechazarAdmin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rechazar"
+                android:textColor="@android:color/white"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:textSize="14sp" />
+
+            <Space
+                android:layout_width="16dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/btnAprobarAdmin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aprobar"
+                android:textColor="@android:color/white"
+                android:backgroundTint="@android:color/holo_green_dark"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+
     <!-- ScrollView -->
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/backInicio"
+        app:layout_constraintTop_toBottomOf="@+id/layoutModeracionAdmin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">

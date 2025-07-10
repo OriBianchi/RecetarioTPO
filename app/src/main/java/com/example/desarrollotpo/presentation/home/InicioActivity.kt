@@ -29,6 +29,7 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import com.example.desarrollotpo.utils.setupBottomNavigation
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
 class InicioActivity : BaseActivity() {

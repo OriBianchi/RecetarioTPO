@@ -63,17 +63,37 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="4dp"/>
 
-    <!-- Cantidad de recetas -->
-    <TextView
-        android:id="@+id/tvRecipeCount"
+    <LinearLayout
+        android:id="@+id/adminButtonsContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Recetas escritas: 5"
-        android:textSize="14sp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_marginTop="24dp"
         app:layout_constraintTop_toBottomOf="@id/tvUserType"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="4dp"/>
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModerarRecetas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Moderar Recetas"
+            android:textColor="@android:color/white"
+            app:cornerRadius="24dp"/>
+
+        <Space
+            android:layout_width="16dp"
+            android:layout_height="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModerarComentarios"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Moderar Comentarios"
+            android:textColor="@android:color/white"
+            app:cornerRadius="24dp"/>
+    </LinearLayout>
 
     <!-- Botón para desloguearse -->
     <com.google.android.material.button.MaterialButton
@@ -84,7 +104,7 @@
         android:textColor="@android:color/white"
         app:cornerRadius="24dp"
         app:backgroundTint="@android:color/holo_red_dark"
-        app:layout_constraintTop_toBottomOf="@id/tvRecipeCount"
+        app:layout_constraintTop_toBottomOf="@id/adminButtonsContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="32dp"/>
