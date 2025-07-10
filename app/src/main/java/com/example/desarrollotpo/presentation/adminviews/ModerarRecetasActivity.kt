@@ -55,6 +55,7 @@ class ModerarRecetasActivity : BaseActivity() {
 
     private fun cargarRecetasPendientes() {
         mostrarLoader()
+        recetasPendientes.clear()
 
         val token = TokenUtils.obtenerToken(this)
         val request = Request.Builder()
