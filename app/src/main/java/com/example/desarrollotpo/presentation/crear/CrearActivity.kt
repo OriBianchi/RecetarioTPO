@@ -59,6 +59,9 @@ class CrearActivity : AppCompatActivity() {
     private val fotosPasosBase64 = mutableListOf<MutableList<String>>()
     private var pasoViewSeleccionadoParaImagen: View? = null
 
+    private var recetaNombreOriginal: String? = null
+
+
     private val launcherImagenesPaso = registerForActivityResult(
         ActivityResultContracts.GetMultipleContents()
     ) { uris ->
@@ -142,6 +145,8 @@ class CrearActivity : AppCompatActivity() {
         val recetaFrontImage = intent.getStringExtra("RECIPE_FRONT_IMAGE")
         val recetaStepsJson = intent.getStringExtra("RECIPE_STEPS_JSON")
         val recetaNombre = intent.getStringExtra("RECIPE_NAME")
+        recetaNombreOriginal = recetaNombre
+
         val recetaDescripcion = intent.getStringExtra("RECIPE_DESCRIPTION")
         val recetaTipo = intent.getStringExtra("RECIPE_TYPE")
         val recetaIngredientes = intent.getStringArrayExtra("RECIPE_INGREDIENTS") ?: arrayOf()
@@ -219,10 +224,17 @@ class CrearActivity : AppCompatActivity() {
             if (validarFormulario()) {
                 val json = construirJsonReceta()
                 if (recetaId.isNullOrEmpty()) {
-                    enviarReceta(json) // Crea nueva
+                    verificarSiExisteRecetaConEseNombre(json)
                 } else {
-                    actualizarReceta(recetaId, json) // Actualiza existente
+                    val nombreNuevo = json.optString("name", "").trim()
+                    if (!nombreNuevo.equals(recetaNombreOriginal, ignoreCase = true)) {
+                        verificarSiExisteRecetaConEseNombre(json, recetaId)
+                    } else {
+                        actualizarReceta(recetaId, json)
+                    }
                 }
+
+
             }
         }
 
@@ -243,6 +255,66 @@ class CrearActivity : AppCompatActivity() {
         }
 
     }
+
+    private fun verificarSiExisteRecetaConEseNombre(json: JSONObject, idActual: String? = null) {
+        val token = TokenUtils.obtenerToken(this)
+        val nombre = json.optString("name", "").trim()
+        if (nombre.isEmpty()) return
+
+        val client = OkHttpClient()
+        val url = "https://desarrolloitpoapi.onrender.com/api/recipes/check-name?name=$nombre"
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer $token")
+            .get()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(this@CrearActivity, "Error verificando receta existente", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val respuesta = JSONObject(response.body?.string() ?: "{}")
+                val existe = respuesta.optBoolean("exists", false)
+                val idExistente = respuesta.optString("id", "")
+
+                runOnUiThread {
+                    if (existe && idExistente.isNotEmpty() && idExistente != idActual) {
+                        AlertDialog.Builder(this@CrearActivity)
+                            .setTitle("Receta ya existente")
+                            .setMessage("Ya tenés una receta con ese nombre. ¿Querés reemplazarla?")
+                            .setPositiveButton("Sí, reemplazar") { _, _ ->
+                                if (idActual != null) {
+                                    // Estás editando → borrar la que estás editando y actualizar la que ya existe
+                                    eliminarReceta(idActual) {
+                                        actualizarReceta(idExistente, json)
+                                    }
+                                } else {
+                                    // Estás creando → borrar la existente y crear nueva
+                                    eliminarReceta(idExistente) {
+                                        enviarReceta(json)
+                                    }
+                                }
+
+                            }
+                            .setNegativeButton("No, cancelar", null)
+                            .show()
+                    } else {
+                        if (idActual != null) {
+                            actualizarReceta(idActual, json)
+                        } else {
+                            enviarReceta(json)
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+
 
     private fun construirJsonReceta(): JSONObject {
         val name = findViewById<EditText>(R.id.etNombre).text.toString().trim()
@@ -566,7 +638,7 @@ class CrearActivity : AppCompatActivity() {
         })
     }
 
-    private fun eliminarReceta(id: String) {
+    private fun eliminarReceta(id: String, callback: (() -> Unit)? = null) {
         val token = TokenUtils.obtenerToken(this)
         if (token.isEmpty()) {
             Toast.makeText(this, "No se encontró un token. Iniciá sesión.", Toast.LENGTH_LONG).show()
@@ -597,7 +669,11 @@ class CrearActivity : AppCompatActivity() {
                     ocultarLoader()
                     if (response.isSuccessful) {
                         Toast.makeText(this@CrearActivity, "Receta eliminada", Toast.LENGTH_LONG).show()
-                        finish()
+                        if (callback != null) {
+                            callback()
+                        } else {
+                            finish()
+                        }
                     } else {
                         Toast.makeText(this@CrearActivity, "Error ${response.code}: ${response.message}", Toast.LENGTH_LONG).show()
                     }
@@ -605,6 +681,8 @@ class CrearActivity : AppCompatActivity() {
             }
         })
     }
+
+
     private fun traerRecetaParaEditar(id: String) {
 
         val token = TokenUtils.obtenerToken(this)
