@@ -1,6 +1,6 @@
 package com.example.desarrollotpo.presentation.login
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText
@@ -12,9 +12,6 @@ import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
-import com.google.android.gms.auth.api.credentials.*
-import com.google.android.gms.auth.api.credentials.Credentials
-import com.google.android.gms.common.api.ResolvableApiException
 import android.widget.TextView
 import android.widget.ImageView
 import com.example.desarrollotpo.core.BaseActivity
@@ -25,9 +22,6 @@ import org.json.JSONObject
 
 class LoginFormActivity : BaseActivity() {
 
-    private lateinit var credentialsClient: CredentialsClient
-    private val CREDENTIAL_SAVE_REQUEST = 1001
-
     private fun isValidEmail(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
@@ -36,24 +30,24 @@ class LoginFormActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login_form)
 
-        credentialsClient = Credentials.getClient(this)
-
         val emailEditText = findViewById<EditText>(R.id.emailInput)
         val passwordEditText = findViewById<EditText>(R.id.passwordInput)
         val loginButton = findViewById<MaterialButton>(R.id.confirmLoginButton)
         val backInicio = findViewById<ImageView>(R.id.backInicio)
         val forgotPasswordText = findViewById<TextView>(R.id.olvidocontra)
 
-
-
         forgotPasswordText.setOnClickListener {
             startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
 
-
         backInicio.setOnClickListener {
             startActivity(Intent(this, WelcomeActivity::class.java))
         }
+
+        // Recuperar email si está guardado
+        val prefs = getSharedPreferences("MisPreferencias", Context.MODE_PRIVATE)
+        val emailGuardado = prefs.getString("email", "")
+        emailEditText.setText(emailGuardado)
 
         loginButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
@@ -91,52 +85,27 @@ class LoginFormActivity : BaseActivity() {
 
                                     if (token.isNotEmpty()) {
                                         com.example.desarrollotpo.utils.TokenUtils.guardarToken(this@LoginFormActivity, token)
+
+                                        // Guardar email y token en SharedPreferences
+                                        val prefs = getSharedPreferences("MisPreferencias", Context.MODE_PRIVATE)
+                                        with(prefs.edit()) {
+                                            putString("email", email)
+                                            putString("token", token)
+                                            apply()
+                                        }
+
                                         Toast.makeText(this@LoginFormActivity, "¡Login exitoso! 🎉", Toast.LENGTH_SHORT).show()
-                                        saveCredential(email, password)
                                         startActivity(Intent(this@LoginFormActivity, InicioActivity::class.java))
                                     } else {
                                         Toast.makeText(this@LoginFormActivity, "Token no recibido 😕", Toast.LENGTH_SHORT).show()
                                     }
+                                } else {
+                                    Toast.makeText(this@LoginFormActivity, "Credenciales incorrectas", Toast.LENGTH_SHORT).show()
                                 }
-
                             }
                         }
                     })
                 }
-            }
-        }
-    }
-
-    private fun saveCredential(email: String, password: String) {
-        val credential = Credential.Builder(email)
-            .setPassword(password)
-            .build()
-
-        credentialsClient.save(credential).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(this, "Credencial guardada 🔐", Toast.LENGTH_SHORT).show()
-            } else {
-                val e = task.exception
-                if (e is ResolvableApiException) {
-                    try {
-                        e.startResolutionForResult(this, CREDENTIAL_SAVE_REQUEST)
-                    } catch (ex: Exception) {
-                        Toast.makeText(this, "No se pudo mostrar el diálogo", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(this, "No se pudo guardar la credencial 😓", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CREDENTIAL_SAVE_REQUEST) {
-            if (resultCode == Activity.RESULT_OK) {
-                Toast.makeText(this, "Credencial guardada ✅", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Guardado cancelado", Toast.LENGTH_SHORT).show()
             }
         }
     }
